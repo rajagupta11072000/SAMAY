@@ -1,33 +1,63 @@
 body {
-  font-family: sans-serif;
-  background: #f9f9f9;
-  color: #333;
-  text-align: center;
+  font-family: 'Poppins', sans-serif;
   margin: 0;
-  padding: 10px;
+  background: #f0f4f8;
+  color: #333;
 }
-.dark-mode {
-  background: #121212;
+body.dark {
+  background: #121619;
   color: #eee;
 }
 header {
-  background: #4CAF50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #4a90e2;
   color: white;
-  padding: 1em;
+}
+main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+.card {
+  background: white;
+  width: 300px;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+body.dark .card {
+  background: #1e242c;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.controls {
+  margin: 0.5rem 0;
 }
 button {
-  margin: 5px;
-  padding: 10px;
-  font-size: 1em;
+  margin: 0.2rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
 }
-section {
-  margin: 20px auto;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  max-width: 500px;
+input[type="time"], input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
 }
-input {
-  padding: 8px;
-  font-size: 1em;
+#world-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+.city-card {
+  background: #e5e9f2;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+body.dark .city-card {
+  background: #2d333f;
 }
