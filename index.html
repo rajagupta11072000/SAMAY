@@ -3,132 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Samay - समय प्रबंधन</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-    h1 { margin-bottom: 10px; }
-    .clock, .stopwatch, .timer, .alarm, .world-clock { margin: 20px auto; padding: 15px; background: white; border-radius: 8px; width: 90%; max-width: 400px; }
-    button { margin: 5px; padding: 10px; }
-    input[type="time"], input[type="number"] { padding: 5px; }
-  </style>
+  <title>Samay v2.0 - समय प्रबंधन</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
+  <header>
+    <h1>🕰️ Samay v2.0</h1>
+    <div id="date"></div>
+    <button onclick="toggleTheme()">🌓 थीम बदलें</button>
+    <button onclick="toggleFocusMode()">🎯 फोकस मोड</button>
+    <button onclick="toggleLanguage()">🌐 भाषा</button>
+  </header>
 
-  <h1>🕰️ Samay - समय प्रबंधन टूल</h1>
+  <main>
+    <section id="clock-section">
+      <h2>⏰ डिजिटल घड़ी</h2>
+      <div id="digital-clock"></div>
+    </section>
 
-  <!-- Digital Clock -->
-  <div class="clock">
-    <h2>डिजिटल घड़ी</h2>
-    <div id="digital-clock" style="font-size: 2em;"></div>
-  </div>
+    <section id="stopwatch-section">
+      <h2>⏱ स्टॉपवॉच</h2>
+      <div id="stopwatch-display">00:00:00</div>
+      <button onclick="startStopwatch()">Start</button>
+      <button onclick="stopStopwatch()">Stop</button>
+      <button onclick="resetStopwatch()">Reset</button>
+      <div id="stopwatch-history"></div>
+    </section>
 
-  <!-- Stopwatch -->
-  <div class="stopwatch">
-    <h2>स्टॉपवॉच</h2>
-    <div id="stopwatch">00:00:00</div>
-    <button onclick="startStopwatch()">Start</button>
-    <button onclick="stopStopwatch()">Stop</button>
-    <button onclick="resetStopwatch()">Reset</button>
-  </div>
+    <section id="timer-section">
+      <h2>⌛ टाइमर</h2>
+      <input type="number" id="timer-mins" placeholder="मिनट डालें" />
+      <button onclick="startTimer()">Start</button>
+      <div id="timer-display">00:00</div>
+    </section>
 
-  <!-- Timer -->
-  <div class="timer">
-    <h2>काउंटडाउन टाइमर</h2>
-    <input type="number" id="timer-minutes" placeholder="मिनट दर्ज करें" />
-    <button onclick="startTimer()">Start</button>
-    <div id="timer-display">00:00</div>
-  </div>
+    <section id="pomodoro-section">
+      <h2>🍅 Pomodoro Timer</h2>
+      <div id="pomodoro-display">25:00</div>
+      <button onclick="startPomodoro()">Start</button>
+      <button onclick="resetPomodoro()">Reset</button>
+    </section>
 
-  <!-- Alarm -->
-  <div class="alarm">
-    <h2>अलार्म सेट करें</h2>
-    <input type="time" id="alarm-time" />
-    <button onclick="setAlarm()">Set Alarm</button>
-    <div id="alarm-status">कोई अलार्म सेट नहीं है</div>
-  </div>
+    <section id="alarm-section">
+      <h2>🔔 अलार्म</h2>
+      <input type="time" id="alarm-time" />
+      <button onclick="setAlarm()">Set Alarm</button>
+      <div id="alarm-status">कोई अलार्म सेट नहीं</div>
+    </section>
 
-  <!-- World Clock -->
-  <div class="world-clock">
-    <h2>वर्ल्ड क्लॉक</h2>
-    <div id="world-time"></div>
-  </div>
+    <section id="world-clock-section">
+      <h2>🌍 वर्ल्ड क्लॉक</h2>
+      <input type="text" id="city-search" placeholder="शहर खोजें..." oninput="searchCity()"/>
+      <div id="world-time-list"></div>
+    </section>
 
-  <script>
-    // Digital Clock
-    setInterval(() => {
-      const now = new Date();
-      document.getElementById("digital-clock").textContent = now.toLocaleTimeString();
-    }, 1000);
+    <section id="export-section">
+      <h2>📤 रिपोर्ट एक्सपोर्ट</h2>
+      <button onclick="exportCSV()">CSV डाउनलोड करें</button>
+    </section>
+  </main>
 
-    // Stopwatch
-    let swInterval, swTime = 0;
-    function updateStopwatch() {
-      let h = Math.floor(swTime / 3600);
-      let m = Math.floor((swTime % 3600) / 60);
-      let s = swTime % 60;
-      document.getElementById("stopwatch").textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    }
-    function startStopwatch() {
-      if (!swInterval) swInterval = setInterval(() => { swTime++; updateStopwatch(); }, 1000);
-    }
-    function stopStopwatch() {
-      clearInterval(swInterval);
-      swInterval = null;
-    }
-    function resetStopwatch() {
-      stopStopwatch();
-      swTime = 0;
-      updateStopwatch();
-    }
-
-    // Timer
-    let timerInterval;
-    function startTimer() {
-      const mins = parseInt(document.getElementById("timer-minutes").value);
-      let timeLeft = mins * 60;
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          alert("⏰ टाइमर समाप्त!");
-        } else {
-          let m = Math.floor(timeLeft / 60);
-          let s = timeLeft % 60;
-          document.getElementById("timer-display").textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-          timeLeft--;
-        }
-      }, 1000);
-    }
-
-    // Alarm
-    let alarmTime;
-    function setAlarm() {
-      alarmTime = document.getElementById("alarm-time").value;
-      document.getElementById("alarm-status").textContent = `अलार्म सेट है: ${alarmTime}`;
-    }
-    setInterval(() => {
-      const now = new Date();
-      const current = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-      if (alarmTime === current) {
-        alert("🔔 अलार्म बजा!");
-        alarmTime = null;
-        document.getElementById("alarm-status").textContent = "कोई अलार्म सेट नहीं है";
-      }
-    }, 1000);
-
-    // World Clock
-    function updateWorldClock() {
-      const now = new Date();
-      let times = [
-        `🇮🇳 भारत: ${now.toLocaleTimeString('en-IN', {timeZone: 'Asia/Kolkata'})}`,
-        `🇺🇸 न्यूयॉर्क: ${now.toLocaleTimeString('en-US', {timeZone: 'America/New_York'})}`,
-        `🇬🇧 लंदन: ${now.toLocaleTimeString('en-GB', {timeZone: 'Europe/London'})}`,
-        `🇯🇵 टोक्यो: ${now.toLocaleTimeString('ja-JP', {timeZone: 'Asia/Tokyo'})}`
-      ];
-      document.getElementById("world-time").innerHTML = times.join("<br>");
-    }
-    setInterval(updateWorldClock, 1000);
-  </script>
-
+  <script src="app.js"></script>
 </body>
 </html>
