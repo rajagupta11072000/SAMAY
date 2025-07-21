@@ -1,0 +1,33 @@
+body {
+  font-family: sans-serif;
+  background: #f9f9f9;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 10px;
+}
+.dark-mode {
+  background: #121212;
+  color: #eee;
+}
+header {
+  background: #4CAF50;
+  color: white;
+  padding: 1em;
+}
+button {
+  margin: 5px;
+  padding: 10px;
+  font-size: 1em;
+}
+section {
+  margin: 20px auto;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+}
+input {
+  padding: 8px;
+  font-size: 1em;
+}
