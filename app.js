@@ -1,62 +1,4 @@
-// 🌐 Language Support
-let currentLang = 'hi';
-const langData = {
-  hi: {
-    digitalClock: 'डिजिटल घड़ी',
-    worldClock: 'वर्ल्ड क्लॉक',
-    alarm: 'अलार्म',
-    stopwatch: 'स्टॉपवॉच',
-    timer: 'काउंटडाउन',
-    pomodoro: 'पोमोडोरो',
-    currentTime: '⏰ वर्तमान समय',
-    setAlarm: '🔔 अलार्म सेट करें',
-    softBell: 'सॉफ्ट बेल',
-    classic: 'क्लासिक',
-    morningTone: 'सुबह धुन',
-    set: 'सेट करें',
-    start: 'शुरू',
-    stop: 'रोकें',
-    reset: 'रीसेट',
-    countdown: '⌛ काउंटडाउन टाइमर',
-    theme: 'थीम',
-    language: 'भाषा',
-  },
-  en: {
-    digitalClock: 'Digital Clock',
-    worldClock: 'World Clock',
-    alarm: 'Alarm',
-    stopwatch: 'Stopwatch',
-    timer: 'Countdown',
-    pomodoro: 'Pomodoro',
-    currentTime: '⏰ Current Time',
-    setAlarm: '🔔 Set Alarm',
-    softBell: 'Soft Bell',
-    classic: 'Classic',
-    morningTone: 'Morning Tone',
-    set: 'Set',
-    start: 'Start',
-    stop: 'Stop',
-    reset: 'Reset',
-    countdown: '⌛ Countdown Timer',
-    theme: 'Theme',
-    language: 'Language',
-  }
-};
-
-function toggleLanguage() {
-  currentLang = currentLang === 'hi' ? 'en' : 'hi';
-  document.querySelectorAll('[data-key]').forEach(el => {
-    const key = el.getAttribute('data-key');
-    if (langData[currentLang][key]) el.innerText = langData[currentLang][key];
-  });
-}
-
-// 🌓 Theme
-function toggleTheme() {
-  document.body.classList.toggle('dark');
-}
-
-// 🔄 Tabs
+// 🔁 Tab Switching
 function switchTab(id) {
   document.querySelectorAll('#sidebar li').forEach(el => el.classList.remove('active'));
   document.querySelector(`#sidebar li[onclick*="${id}"]`).classList.add('active');
@@ -64,9 +6,15 @@ function switchTab(id) {
   document.getElementById(`${id}-tab`).classList.add('active');
 }
 
+// 🌓 Theme Toggle
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+}
+
 // ⏰ Digital Clock
 setInterval(() => {
-  document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString();
+  const now = new Date();
+  document.getElementById('digital-clock').innerText = now.toLocaleTimeString();
 }, 1000);
 
 // 🌍 World Clock
@@ -81,16 +29,7 @@ const cityList = [
   { name: 'बीजिंग', tz: 'Asia/Shanghai', flag: '🇨🇳' },
   { name: 'सिंगापुर', tz: 'Asia/Singapore', flag: '🇸🇬' },
   { name: 'कैप टाउन', tz: 'Africa/Johannesburg', flag: '🇿🇦' },
-  { name: 'मास्को', tz: 'Europe/Moscow', flag: '🇷🇺' },
-  { name: 'बैंकॉक', tz: 'Asia/Bangkok', flag: '🇹🇭' },
-  { name: 'रोम', tz: 'Europe/Rome', flag: '🇮🇹' },
-  { name: 'बर्लिन', tz: 'Europe/Berlin', flag: '🇩🇪' },
-  { name: 'काठमांडू', tz: 'Asia/Kathmandu', flag: '🇳🇵' },
-  { name: 'इस्लामाबाद', tz: 'Asia/Karachi', flag: '🇵🇰' },
-  { name: 'काबुल', tz: 'Asia/Kabul', flag: '🇦🇫' },
-  { name: 'ब्रासीलिया', tz: 'America/Sao_Paulo', flag: '🇧🇷' },
-  { name: 'कुआलालंपुर', tz: 'Asia/Kuala_Lumpur', flag: '🇲🇾' },
-  { name: 'हॉगकॉग', tz: 'Asia/Hong_Kong', flag: '🇭🇰' }
+  { name: 'साओ पाउलो', tz: 'America/Sao_Paulo', flag: '🇧🇷' }
 ];
 
 function renderWorldClock() {
@@ -98,12 +37,18 @@ function renderWorldClock() {
   grid.innerHTML = '';
   cityList.forEach(city => {
     const time = new Date().toLocaleTimeString('en-US', { timeZone: city.tz, hour12: false });
-    const card = `<div class="city-card"><div>${city.flag} ${city.name}</div><div>${time}</div></div>`;
+    const card = `
+      <div class="city-card">
+        <div>${city.flag} ${city.name}</div>
+        <div>${time}</div>
+      </div>
+    `;
     grid.innerHTML += card;
   });
 }
 setInterval(renderWorldClock, 1000);
 
+// 🔍 City Search
 function filterCities() {
   const input = document.getElementById('search-city').value.toLowerCase();
   const filtered = cityList.filter(city => city.name.toLowerCase().includes(input));
@@ -111,7 +56,12 @@ function filterCities() {
   grid.innerHTML = '';
   filtered.forEach(city => {
     const time = new Date().toLocaleTimeString('en-US', { timeZone: city.tz, hour12: false });
-    const card = `<div class="city-card"><div>${city.flag} ${city.name}</div><div>${time}</div></div>`;
+    const card = `
+      <div class="city-card">
+        <div>${city.flag} ${city.name}</div>
+        <div>${time}</div>
+      </div>
+    `;
     grid.innerHTML += card;
   });
 }
@@ -123,9 +73,8 @@ function setAlarm() {
   const tone = document.getElementById('alarm-tone').value;
   if (time) {
     alarmTime = time;
-    const audio = document.getElementById('alarm-audio');
-    audio.src = tone;
-    document.getElementById('alarm-status').innerText = `${time} सेट किया गया`;
+    document.getElementById('alarm-audio').src = tone;
+    document.getElementById('alarm-status').innerText = `सेट किया गया: ${alarmTime}`;
   }
 }
 setInterval(() => {
@@ -165,7 +114,7 @@ function startTimer() {
     timerInt = setInterval(() => {
       if (tLeft <= 0) {
         clearInterval(timerInt);
-        document.getElementById('timer-display').innerText = currentLang === 'hi' ? 'समय समाप्त' : 'Time\'s up';
+        document.getElementById('timer-display').innerText = 'समय समाप्त';
       } else {
         document.getElementById('timer-display').innerText = new Date(tLeft * 1000).toISOString().substr(14, 5);
         tLeft--;
@@ -184,7 +133,7 @@ function startPomodoro() {
   pomoInt = setInterval(() => {
     if (pomoLeft <= 0) {
       clearInterval(pomoInt);
-      alert(currentLang === 'hi' ? '🍅 पोमोडोरो समाप्त!' : '🍅 Pomodoro done!');
+      alert('🍅 पोमोडोरो समाप्त!');
       pomoLeft = 1500;
       updatePomodoro();
     } else {
