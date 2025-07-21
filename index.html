@@ -3,64 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Samay v2.0 - समय प्रबंधन</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Samay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"/>
   <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <h1>🕰️ Samay v2.0</h1>
-    <div id="date"></div>
-    <button onclick="toggleTheme()">🌓 थीम बदलें</button>
-    <button onclick="toggleFocusMode()">🎯 फोकस मोड</button>
-    <button onclick="toggleLanguage()">🌐 भाषा</button>
+    <h1>Samay</h1>
+    <div>
+      <button onclick="toggleTheme()">🌓</button>
+      <button onclick="toggleFocusMode()">🎯</button>
+    </div>
   </header>
 
   <main>
-    <section id="clock-section">
+    <section class="card" id="clock-card">
       <h2>⏰ डिजिटल घड़ी</h2>
       <div id="digital-clock"></div>
     </section>
 
-    <section id="stopwatch-section">
-      <h2>⏱ स्टॉपवॉच</h2>
-      <div id="stopwatch-display">00:00:00</div>
-      <button onclick="startStopwatch()">Start</button>
-      <button onclick="stopStopwatch()">Stop</button>
-      <button onclick="resetStopwatch()">Reset</button>
-      <div id="stopwatch-history"></div>
+    <section class="card" id="world-card">
+      <h2>🌍 वर्ल्ड क्लॉक</h2>
+      <div id="world-time-grid"></div>
     </section>
 
-    <section id="timer-section">
+    <section class="card" id="alarm-card">
+      <h2>🔔 अलार्म</h2>
+      <input type="time" id="alarm-time" />
+      <button onclick="setAlarm()">Set Alarm</button>
+      <div id="alarm-status">---</div>
+      <audio id="alarm-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+    </section>
+
+    <section class="card" id="stopwatch-card">
+      <h2>⏱ स्टॉपवॉच</h2>
+      <div id="stopwatch-display">00:00:00</div>
+      <div class="controls">
+        <button onclick="startStopwatch()">Start</button>
+        <button onclick="stopStopwatch()">Stop</button>
+        <button onclick="resetStopwatch()">Reset</button>
+      </div>
+      <div id="stopwatch-history"></div>
+      <button onclick="exportCSV()">Export CSV</button>
+    </section>
+
+    <section class="card" id="timer-card">
       <h2>⌛ टाइमर</h2>
       <input type="number" id="timer-mins" placeholder="मिनट डालें" />
       <button onclick="startTimer()">Start</button>
       <div id="timer-display">00:00</div>
     </section>
 
-    <section id="pomodoro-section">
-      <h2>🍅 Pomodoro Timer</h2>
+    <section class="card" id="pomodoro-card">
+      <h2>🍅 Pomodoro</h2>
       <div id="pomodoro-display">25:00</div>
-      <button onclick="startPomodoro()">Start</button>
-      <button onclick="resetPomodoro()">Reset</button>
-    </section>
-
-    <section id="alarm-section">
-      <h2>🔔 अलार्म</h2>
-      <input type="time" id="alarm-time" />
-      <button onclick="setAlarm()">Set Alarm</button>
-      <div id="alarm-status">कोई अलार्म सेट नहीं</div>
-    </section>
-
-    <section id="world-clock-section">
-      <h2>🌍 वर्ल्ड क्लॉक</h2>
-      <input type="text" id="city-search" placeholder="शहर खोजें..." oninput="searchCity()"/>
-      <div id="world-time-list"></div>
-    </section>
-
-    <section id="export-section">
-      <h2>📤 रिपोर्ट एक्सपोर्ट</h2>
-      <button onclick="exportCSV()">CSV डाउनलोड करें</button>
+      <div class="controls">
+        <button onclick="startPomodoro()">Start</button>
+        <button onclick="resetPomodoro()">Reset</button>
+      </div>
     </section>
   </main>
 
