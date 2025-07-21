@@ -1,10 +1,10 @@
 {
-  "name": "Samay v2.0",
+  "name": "Samay",
   "short_name": "Samay",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#f0f4f8",
+  "theme_color": "#4a90e2",
   "icons": [
     {
       "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Clock_icon_green.svg/1024px-Clock_icon_green.svg.png",
