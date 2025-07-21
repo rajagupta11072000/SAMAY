@@ -1,148 +1,96 @@
-// 🌐 भाषा टॉगल
-let lang = "hi";
-function toggleLanguage() {
-  lang = lang === "hi" ? "en" : "hi";
-  alert(`Language changed to: ${lang === "hi" ? "हिंदी" : "English"}`);
-}
-
-// 🌒 थीम टॉगल
+// Theme & Focus
 function toggleTheme() {
-  document.body.classList.toggle("dark-mode");
+  document.body.classList.toggle('dark');
 }
-
-// 🎯 फोकस मोड
 function toggleFocusMode() {
-  document.body.classList.toggle("focus-mode");
+  document.body.classList.toggle('focus');
+  document.querySelector('main').classList.toggle('hidden');
 }
 
-// 📅 दिन व तारीख
+// Digital Clock
 setInterval(() => {
-  const now = new Date();
-  document.getElementById("date").textContent = now.toLocaleDateString(lang, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  document.getElementById('digital-clock').textContent = 
+    new Date().toLocaleTimeString();
 }, 1000);
 
-// ⏰ डिजिटल घड़ी
-setInterval(() => {
+// World Clock
+const cities = [
+  {c:'🇮🇳 Delhi', tz:'Asia/Kolkata'},
+  {c:'🇺🇸 New York', tz:'America/New_York'},
+  {c:'🇬🇧 London', tz:'Europe/London'},
+  {c:'🇫🇷 Paris', tz:'Europe/Paris'},
+  {c:'🇩🇪 Berlin', tz:'Europe/Berlin'},
+  {c:'🇦🇺 Sydney', tz:'Australia/Sydney'},
+  {c:'🇯🇵 Tokyo', tz:'Asia/Tokyo'},
+  {c:'🇨🇳 Beijing', tz:'Asia/Shanghai'},
+  {c:'🇧🇷 São Paulo', tz:'America/Sao_Paulo'},
+  {c:'🇿🇦 Cape Town', tz:'Africa/Johannesburg'}
+];
+function updateWorld() {
+  const grid = document.getElementById('world-time-grid');
   const now = new Date();
-  document.getElementById("digital-clock").textContent = now.toLocaleTimeString(lang);
-}, 1000);
+  grid.innerHTML = cities.map(city => {
+    const t = now.toLocaleTimeString('en-US', {timeZone: city.tz, hour12:false});
+    return `<div class="city-card"><div>${city.c}</div><div>${t}</div></div>`;
+  }).join('');
+}
+setInterval(updateWorld, 1000);
 
-// ⏱ स्टॉपवॉच
-let swTime = 0, swInterval, history = [];
-function updateStopwatch() {
-  let h = Math.floor(swTime / 3600), m = Math.floor((swTime % 3600) / 60), s = swTime % 60;
-  document.getElementById("stopwatch-display").textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
-function startStopwatch() {
-  if (!swInterval) swInterval = setInterval(() => { swTime++; updateStopwatch(); }, 1000);
-}
-function stopStopwatch() {
-  clearInterval(swInterval); swInterval = null;
-  history.push(swTime);
-  showStopwatchHistory();
-}
-function resetStopwatch() {
-  stopStopwatch(); swTime = 0; updateStopwatch();
-}
-function showStopwatchHistory() {
-  const histDiv = document.getElementById("stopwatch-history");
-  histDiv.innerHTML = "<strong>इतिहास:</strong><br>" + history.map(t => new Date(t * 1000).toISOString().substr(11, 8)).join("<br>");
-}
-
-// ⌛ टाइमर
-function startTimer() {
-  let time = parseInt(document.getElementById("timer-mins").value) * 60;
-  let timerDisplay = document.getElementById("timer-display");
-  let interval = setInterval(() => {
-    if (time <= 0) {
-      clearInterval(interval);
-      alert("⏰ टाइमर समाप्त!");
-    } else {
-      let m = Math.floor(time / 60), s = time % 60;
-      timerDisplay.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-      time--;
-    }
-  }, 1000);
-}
-
-// 🍅 Pomodoro
-let pomoTime = 1500, pomoInterval;
-function updatePomodoro() {
-  let m = Math.floor(pomoTime / 60), s = pomoTime % 60;
-  document.getElementById("pomodoro-display").textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
-function startPomodoro() {
-  if (!pomoInterval) pomoInterval = setInterval(() => {
-    pomoTime--; updatePomodoro();
-    if (pomoTime <= 0) {
-      clearInterval(pomoInterval);
-      alert("⏳ Pomodoro समाप्त!");
-      pomoTime = 300; updatePomodoro(); // Break
-    }
-  }, 1000);
-}
-function resetPomodoro() {
-  clearInterval(pomoInterval); pomoTime = 1500; pomoInterval = null; updatePomodoro();
-}
-updatePomodoro();
-
-// 🔔 अलार्म
-let alarmSetTime;
-function setAlarm() {
-  alarmSetTime = document.getElementById("alarm-time").value;
-  document.getElementById("alarm-status").textContent = `सेट किया गया: ${alarmSetTime}`;
+// Alarm
+let alarmTime = null;
+function setAlarm(){
+  alarmTime = document.getElementById('alarm-time').value;
+  document.getElementById('alarm-status').textContent = `Set for ${alarmTime}`;
 }
 setInterval(() => {
-  const now = new Date();
-  const current = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
-  if (alarmSetTime === current) {
-    alert("🔔 अलार्म बजा!");
-    alarmSetTime = null;
-    document.getElementById("alarm-status").textContent = "कोई अलार्म सेट नहीं";
+  const now = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+  if (alarmTime === now) {
+    document.getElementById('alarm-sound').play();
+    alarmTime = null;
+    document.getElementById('alarm-status').textContent = '---';
   }
 }, 1000);
 
-// 🌍 वर्ल्ड क्लॉक
-const cities = [
-  { city: "🇮🇳 Delhi", tz: "Asia/Kolkata" },
-  { city: "🇺🇸 New York", tz: "America/New_York" },
-  { city: "🇬🇧 London", tz: "Europe/London" },
-  { city: "🇫🇷 Paris", tz: "Europe/Paris" },
-  { city: "🇦🇺 Sydney", tz: "Australia/Sydney" },
-  { city: "🇯🇵 Tokyo", tz: "Asia/Tokyo" },
-  { city: "🇦🇪 Dubai", tz: "Asia/Dubai" },
-  { city: "🇨🇳 Beijing", tz: "Asia/Shanghai" },
-  { city: "🇧🇷 São Paulo", tz: "America/Sao_Paulo" }
-];
-function renderWorldClock(filteredCities = cities) {
-  const container = document.getElementById("world-time-list");
-  container.innerHTML = "";
-  const now = new Date();
-  filteredCities.forEach(({ city, tz }) => {
-    const time = now.toLocaleTimeString(lang, { timeZone: tz });
-    container.innerHTML += `<strong>${city}</strong>: ${time}<br>`;
-  });
+// Stopwatch
+let sw = 0, si, hist=[];
+function updateSw(){ document.getElementById('stopwatch-display').textContent = new Date(sw*1000).toISOString().substr(11,8); }
+function startStopwatch(){ if(!si) si=setInterval(()=>{sw++;updateSw()},1000); }
+function stopStopwatch(){ clearInterval(si); si=null; hist.push(sw); showHist(); }
+function resetStopwatch(){ clearInterval(si); si=null; sw=0; hist=[]; updateSw(); showHist(); }
+function showHist(){
+  document.getElementById('stopwatch-history').innerHTML = hist.map((s,i)=>`#${i+1}: ${new Date(s*1000).toISOString().substr(11,8)}`).join('<br>');
 }
-setInterval(() => renderWorldClock(), 1000);
-
-function searchCity() {
-  const input = document.getElementById("city-search").value.toLowerCase();
-  const filtered = cities.filter(c => c.city.toLowerCase().includes(input));
-  renderWorldClock(filtered);
-}
-
-// 📤 CSV एक्सपोर्ट
-function exportCSV() {
-  const rows = history.map((t, i) => `${i + 1},${new Date(t * 1000).toISOString().substr(11, 8)}`);
-  const csv = "No.,Time\n" + rows.join("\n");
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement("a");
+function exportCSV(){
+  const rows = hist.map((s,i)=>`${i+1},${new Date(s*1000).toISOString().substr(11,8)}`);
+  const blob = new Blob([`No,Time\n${rows.join('\n')}`], {type:'text/csv'});
+  const a= document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = "stopwatch_history.csv";
-  a.click();
+  a.download = 'sw_history.csv'; a.click();
 }
+
+// Timer
+let ti, tLeft=0;
+function startTimer(){
+  clearInterval(ti);
+  tLeft = parseInt(document.getElementById('timer-mins').value)*60;
+  ti = setInterval(()=>{
+    if(tLeft<=0){ clearInterval(ti); alert('⏰ टाइमर समाप्त'); }
+    else {
+      document.getElementById('timer-display').textContent = new Date(tLeft*1000).toISOString().substr(14,5);
+      tLeft--;
+    }
+  }, 1000);
+}
+
+// Pomodoro
+let pLeft=1500, pi;
+function updatePom(){ document.getElementById('pomodoro-display').textContent = new Date(pLeft*1000).toISOString().substr(14,5); }
+function startPomodoro(){
+  clearInterval(pi);
+  pi=setInterval(()=>{
+    if(pLeft<=0){ clearInterval(pi); alert('Pomodoro समाप्त'); pLeft=1500; updatePom();}
+    else { pLeft--; updatePom(); }
+  }, 1000);
+}
+function resetPomodoro(){ clearInterval(pi); pLeft=1500; updatePom(); }
+updatePom();
