@@ -1,4 +1,4 @@
-// 🔁 Tab Switching
+// TAB CONTROL
 function switchTab(id) {
   document.querySelectorAll('#sidebar li').forEach(el => el.classList.remove('active'));
   document.querySelector(`#sidebar li[onclick*="${id}"]`).classList.add('active');
@@ -6,67 +6,54 @@ function switchTab(id) {
   document.getElementById(`${id}-tab`).classList.add('active');
 }
 
-// 🌓 Theme Toggle
+// THEME & LANGUAGE
+let lang = 'hi';
 function toggleTheme() {
   document.body.classList.toggle('dark');
 }
+function toggleLanguage() {
+  lang = lang === 'hi' ? 'en' : 'hi';
+  location.reload();
+}
 
-// ⏰ Digital Clock
+// DIGITAL CLOCK
 setInterval(() => {
-  const now = new Date();
-  document.getElementById('digital-clock').innerText = now.toLocaleTimeString();
+  document.getElementById('digital-clock').innerText =
+    new Date().toLocaleTimeString(lang === 'hi' ? 'hi-IN' : 'en-US');
 }, 1000);
 
-// 🌍 World Clock
+// WORLD CLOCK
 const cityList = [
-  { name: 'दिल्ली', tz: 'Asia/Kolkata', flag: '🇮🇳' },
-  { name: 'न्यूयॉर्क', tz: 'America/New_York', flag: '🇺🇸' },
-  { name: 'लंदन', tz: 'Europe/London', flag: '🇬🇧' },
-  { name: 'टोक्यो', tz: 'Asia/Tokyo', flag: '🇯🇵' },
-  { name: 'सिडनी', tz: 'Australia/Sydney', flag: '🇦🇺' },
-  { name: 'दुबई', tz: 'Asia/Dubai', flag: '🇦🇪' },
-  { name: 'पेरिस', tz: 'Europe/Paris', flag: '🇫🇷' },
-  { name: 'बीजिंग', tz: 'Asia/Shanghai', flag: '🇨🇳' },
-  { name: 'सिंगापुर', tz: 'Asia/Singapore', flag: '🇸🇬' },
-  { name: 'कैप टाउन', tz: 'Africa/Johannesburg', flag: '🇿🇦' },
-  { name: 'साओ पाउलो', tz: 'America/Sao_Paulo', flag: '🇧🇷' }
+  { name: { hi: 'दिल्ली', en: 'Delhi' }, tz: 'Asia/Kolkata', flag: '🇮🇳' },
+  { name: { hi: 'न्यूयॉर्क', en: 'New York' }, tz: 'America/New_York', flag: '🇺🇸' },
+  { name: { hi: 'लंदन', en: 'London' }, tz: 'Europe/London', flag: '🇬🇧' },
+  { name: { hi: 'टोक्यो', en: 'Tokyo' }, tz: 'Asia/Tokyo', flag: '🇯🇵' },
+  { name: { hi: 'पेरिस', en: 'Paris' }, tz: 'Europe/Paris', flag: '🇫🇷' }
 ];
-
-function renderWorldClock() {
+function renderWorld() {
   const grid = document.getElementById('world-grid');
   grid.innerHTML = '';
-  cityList.forEach(city => {
-    const time = new Date().toLocaleTimeString('en-US', { timeZone: city.tz, hour12: false });
-    const card = `
+  cityList.forEach(c => {
+    const t = new Date().toLocaleTimeString('en-US', { timeZone: c.tz, hour12: false });
+    const nm = lang === 'hi' ? c.name.hi : c.name.en;
+    grid.innerHTML += `
       <div class="city-card">
-        <div>${city.flag} ${city.name}</div>
-        <div>${time}</div>
-      </div>
-    `;
-    grid.innerHTML += card;
+        <div>${c.flag} ${nm}</div>
+        <div>${t}</div>
+      </div>`;
   });
 }
-setInterval(renderWorldClock, 1000);
+setInterval(renderWorld, 1000);
 
-// 🔍 City Search
+// FILTER
 function filterCities() {
-  const input = document.getElementById('search-city').value.toLowerCase();
-  const filtered = cityList.filter(city => city.name.toLowerCase().includes(input));
-  const grid = document.getElementById('world-grid');
-  grid.innerHTML = '';
-  filtered.forEach(city => {
-    const time = new Date().toLocaleTimeString('en-US', { timeZone: city.tz, hour12: false });
-    const card = `
-      <div class="city-card">
-        <div>${city.flag} ${city.name}</div>
-        <div>${time}</div>
-      </div>
-    `;
-    grid.innerHTML += card;
+  const v = document.getElementById('search-city').value.toLowerCase();
+  document.querySelectorAll('.city-card').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(v) ? 'block' : 'none';
   });
 }
 
-// 🔔 Alarm
+// ALARM
 let alarmTime = null;
 function setAlarm() {
   const time = document.getElementById('alarm-time').value;
@@ -74,77 +61,65 @@ function setAlarm() {
   if (time) {
     alarmTime = time;
     document.getElementById('alarm-audio').src = tone;
-    document.getElementById('alarm-status').innerText = `सेट किया गया: ${alarmTime}`;
+    document.getElementById('alarm-status').innerText = `${lang==='hi'?'सेट':'Set'}: ${alarmTime}`;
   }
 }
 setInterval(() => {
   const now = new Date().toTimeString().slice(0, 5);
   if (alarmTime === now) {
     document.getElementById('alarm-audio').play();
-    document.getElementById('alarm-status').innerText = '🔔 अलार्म बज रहा है!';
+    document.getElementById('alarm-status').innerText = '🔔 ' + (lang==='hi'?'अलार्म':'Alarm') + '!';
     alarmTime = null;
   }
 }, 1000);
 
-// ⏱ Stopwatch
-let sw = 0, swInterval = null;
-function updateStopwatch() {
-  document.getElementById('stop-display').innerText = new Date(sw * 1000).toISOString().substr(11, 8);
+// STOPWATCH
+let sw = 0, swInt = null;
+function updateStop() {
+  document.getElementById('stop-display').innerText =
+    new Date(sw*1000).toISOString().substr(11,8);
 }
-function startStopwatch() {
-  if (!swInterval) swInterval = setInterval(() => { sw++; updateStopwatch(); }, 1000);
-}
-function stopStopwatch() {
-  clearInterval(swInterval);
-  swInterval = null;
-}
-function resetStopwatch() {
-  stopStopwatch();
-  sw = 0;
-  updateStopwatch();
-}
+function startStopwatch() { if (!swInt) swInt = setInterval(() => { sw++; updateStop(); }, 1000); }
+function stopStopwatch() { clearInterval(swInt); swInt = null; }
+function resetStopwatch() { stopStopwatch(); sw = 0; updateStop(); }
 
-// ⌛ Timer
+// TIMER
 let timerInt = null, tLeft = 0;
 function startTimer() {
   const mins = parseInt(document.getElementById('timer-mins').value);
   if (!isNaN(mins)) {
-    tLeft = mins * 60;
+    tLeft = mins*60;
     clearInterval(timerInt);
     timerInt = setInterval(() => {
-      if (tLeft <= 0) {
+      if (tLeft<=0) {
         clearInterval(timerInt);
-        document.getElementById('timer-display').innerText = 'समय समाप्त';
+        document.getElementById('timer-display').innerText = lang==='hi'?'समय समाप्त':'Time Up';
       } else {
-        document.getElementById('timer-display').innerText = new Date(tLeft * 1000).toISOString().substr(14, 5);
+        document.getElementById('timer-display').innerText =
+          new Date(tLeft*1000).toISOString().substr(14,5);
         tLeft--;
       }
     }, 1000);
   }
 }
 
-// 🍅 Pomodoro
+// POMODORO
 let pomoLeft = 1500, pomoInt = null;
-function updatePomodoro() {
-  document.getElementById('pomo-display').innerText = new Date(pomoLeft * 1000).toISOString().substr(14, 5);
+function updatePomo() {
+  document.getElementById('pomo-display').innerText =
+    new Date(pomoLeft*1000).toISOString().substr(14,5);
 }
 function startPomodoro() {
   clearInterval(pomoInt);
   pomoInt = setInterval(() => {
-    if (pomoLeft <= 0) {
+    if (pomoLeft<=0) {
       clearInterval(pomoInt);
-      alert('🍅 पोमोडोरो समाप्त!');
-      pomoLeft = 1500;
-      updatePomodoro();
-    } else {
-      pomoLeft--;
-      updatePomodoro();
-    }
-  }, 1000);
+      alert('🍅 पोमोडोरो समाप्त');
+      pomoLeft = 1500; updatePomo();
+    } else { pomoLeft--; updatePomo(); }
+  },1000);
 }
 function resetPomodoro() {
-  clearInterval(pomoInt);
-  pomoLeft = 1500;
-  updatePomodoro();
+  clearInterval(pomoInt); pomoLeft = 1500; updatePomo();
 }
-updatePomodoro();
+updatePomo();
