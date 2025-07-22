@@ -1,82 +1,64 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>समय</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body class="light">
-
-  <aside id="sidebar">
-    <h2 id="app-title">समय</h2>
-    <ul>
-      <li class="active" onclick="switchTab('clock')"><span data-key="digitalClock">डिजिटल घड़ी</span></li>
-      <li onclick="switchTab('world')"><span data-key="worldClock">वर्ल्ड क्लॉक</span></li>
-      <li onclick="switchTab('alarm')"><span data-key="alarm">अलार्म</span></li>
-      <li onclick="switchTab('stopwatch')"><span data-key="stopwatch">स्टॉपवॉच</span></li>
-      <li onclick="switchTab('timer')"><span data-key="timer">काउंटडाउन</span></li>
-      <li onclick="switchTab('pomodoro')"><span data-key="pomodoro">पोमोडोरो</span></li>
-    </ul>
-    <div class="modes">
-      <button onclick="toggleTheme()">🌓 <span data-key="theme">थीम</span></button>
-      <button onclick="toggleLanguage()">🌐 <span data-key="language">भाषा</span></button>
-    </div>
-  </aside>
-
-  <main id="content">
-    <section id="clock-tab" class="tab active">
-      <h3 data-key="currentTime">⏰ वर्तमान समय</h3>
-      <div id="digital-clock"></div>
-    </section>
-
-    <section id="world-tab" class="tab">
-      <h3 data-key="worldClock">🌍 वर्ल्ड क्लॉक</h3>
-      <input type="text" id="search-city" placeholder="शहर खोजें..." oninput="filterCities()">
-      <div id="world-grid"></div>
-    </section>
-
-    <section id="alarm-tab" class="tab">
-      <h3 data-key="setAlarm">🔔 अलार्म सेट करें</h3>
-      <input type="time" id="alarm-time" />
-      <select id="alarm-tone">
-        <option value="tone1.mp3" data-key="softBell">सॉफ्ट बेल</option>
-        <option value="tone2.mp3" data-key="classic">क्लासिक</option>
-        <option value="tone3.mp3" data-key="morningTone">सुबह धुन</option>
-      </select>
-      <button onclick="setAlarm()" data-key="set">सेट करें</button>
-      <p id="alarm-status">---</p>
-      <audio id="alarm-audio" preload="auto"></audio>
-    </section>
-
-    <section id="stopwatch-tab" class="tab">
-      <h3 data-key="stopwatch">⏱ स्टॉपवॉच</h3>
-      <div id="stop-display">00:00:00</div>
-      <div class="ctrl">
-        <button onclick="startStopwatch()" data-key="start">शुरू</button>
-        <button onclick="stopStopwatch()" data-key="stop">रोकें</button>
-        <button onclick="resetStopwatch()" data-key="reset">रीसेट</button>
-      </div>
-    </section>
-
-    <section id="timer-tab" class="tab">
-      <h3 data-key="countdown">⌛ काउंटडाउन टाइमर</h3>
-      <input type="number" id="timer-mins" placeholder="मिनट दर्ज करें" />
-      <button onclick="startTimer()" data-key="start">शुरू</button>
-      <div id="timer-display">00:00</div>
-    </section>
-
-    <section id="pomodoro-tab" class="tab">
-      <h3 data-key="pomodoro">🍅 पोमोडोरो टाइमर</h3>
-      <div id="pomo-display">25:00</div>
-      <div class="ctrl">
-        <button onclick="startPomodoro()" data-key="start">शुरू</button>
-        <button onclick="resetPomodoro()" data-key="reset">रीसेट</button>
-      </div>
-    </section>
-  </main>
-
-  <script src="app.js"></script>
-</body>
-</html>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+}
+#sidebar {
+  width: 200px;
+  background: #2c3e50;
+  color: #ecf0f1;
+  padding-top: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+}
+#sidebar h2 {
+  text-align: center;
+}
+#sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+#sidebar li {
+  padding: 12px 20px;
+  cursor: pointer;
+}
+#sidebar li.active, #sidebar li:hover {
+  background: #34495e;
+}
+#sidebar .modes {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+main {
+  padding: 20px;
+  flex-grow: 1;
+  background: #ecf0f1;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.tab { display: none; }
+.tab.active { display: block; }
+#digital-clock {
+  font-size: 4rem;
+  text-align: center;
+  margin-top: 50px;
+}
+#world-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.city-card {
+  background: #fff;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+}
+.ctrl button {
+  margin-right: 10px;
+  padding: 5px 10px;
+}
