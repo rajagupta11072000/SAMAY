@@ -2,15 +2,13 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>समय</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>समय - Advanced</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="light">
-
+<body>
   <aside id="sidebar">
-    <h2 id="app-title">समय</h2>
+    <h2>समय</h2>
     <ul>
       <li class="active" onclick="switchTab('clock')">डिजिटल घड़ी</li>
       <li onclick="switchTab('world')">वर्ल्ड क्लॉक</li>
@@ -33,7 +31,7 @@
 
     <section id="world-tab" class="tab">
       <h3>🌍 वर्ल्ड क्लॉक</h3>
-      <input type="text" id="search-city" oninput="filterCities()">
+      <input type="text" id="search-city" oninput="filterCities()" placeholder="शहर खोजें" />
       <div id="world-grid"></div>
     </section>
 
@@ -62,7 +60,7 @@
 
     <section id="timer-tab" class="tab">
       <h3>⌛ काउंटडाउन टाइमर</h3>
-      <input type="number" id="timer-mins">
+      <input type="number" id="timer-mins" placeholder="मिनट" />
       <button onclick="startTimer()">शुरू</button>
       <div id="timer-display">00:00</div>
     </section>
