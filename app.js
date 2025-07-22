@@ -1,125 +1,205 @@
-// TAB CONTROL
-function switchTab(id) {
-  document.querySelectorAll('#sidebar li').forEach(el => el.classList.remove('active'));
-  document.querySelector(`#sidebar li[onclick*="${id}"]`).classList.add('active');
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.getElementById(`${id}-tab`).classList.add('active');
-}
+// 📦 STATE & STORAGE
+let cfg = JSON.parse(localStorage.getItem('cfg')||'{"theme":"light","mode":"digital","alarms":[],"stats":{}}');
+function save(){ localStorage.setItem('cfg', JSON.stringify(cfg)); }
 
-// THEME & LANGUAGE
-let lang = 'hi';
-function toggleTheme() {
+// ⚙ APPLY THEME
+if(cfg.theme==='dark') document.body.classList.add('dark');
+function toggleTheme(){
   document.body.classList.toggle('dark');
-}
-function toggleLanguage() {
-  lang = lang === 'hi' ? 'en' : 'hi';
-  location.reload();
+  cfg.theme = document.body.classList.contains('dark')?'dark':'light';
+  save();
 }
 
-// DIGITAL CLOCK
-setInterval(() => {
-  document.getElementById('digital-clock').innerText =
-    new Date().toLocaleTimeString(lang === 'hi' ? 'hi-IN' : 'en-US');
-}, 1000);
+// 🕒 CLOCK CONTROL
+function toggleClockMode(){
+  cfg.mode = cfg.mode==='digital'?'analog':'digital';
+  save();
+  setupClock();
+}
 
-// WORLD CLOCK
+function setupClock(){
+  const el = document.getElementById('clockContainer');
+  clearInterval(el._int);
+  if(cfg.mode==='digital'){
+    el._int = setInterval(() => el.innerText = new Date().toLocaleTimeString(), 500);
+  } else {
+    el.innerHTML = '<canvas id="analog" width="200" height="200"></canvas>';
+    drawAnalog();
+    el._int = setInterval(drawAnalog, 1000);
+  }
+}
+
+function drawAnalog(){
+  const c=document.getElementById('analog'), ctx=c.getContext('2d'), r=100;
+  ctx.clearRect(0,0,200,200);
+  ctx.save(); ctx.translate(r,r);
+  ctx.beginPath(); ctx.arc(0,0,r-1,0,2*Math.PI); ctx.stroke();
+  const d=new Date(),
+        h=(d.getHours()%12 + d.getMinutes()/60)*30,
+        m=d.getMinutes()*6,
+        s=d.getSeconds()*6;
+  [[h,5],[m,3],[s,1]].forEach(([a,w])=>{
+    ctx.save();
+    ctx.rotate(a*Math.PI/180);
+    ctx.beginPath();
+    ctx.lineWidth=w;
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,-r+10);
+    ctx.stroke();
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// 🌍 WORLD CLOCK: 200+ Timezones
 const cityList = [
-  { name: { hi: 'दिल्ली', en: 'Delhi' }, tz: 'Asia/Kolkata', flag: '🇮🇳' },
-  { name: { hi: 'न्यूयॉर्क', en: 'New York' }, tz: 'America/New_York', flag: '🇺🇸' },
-  { name: { hi: 'लंदन', en: 'London' }, tz: 'Europe/London', flag: '🇬🇧' },
-  { name: { hi: 'टोक्यो', en: 'Tokyo' }, tz: 'Asia/Tokyo', flag: '🇯🇵' },
-  { name: { hi: 'पेरिस', en: 'Paris' }, tz: 'Europe/Paris', flag: '🇫🇷' }
+  { zone: 'Asia/Kolkata', flag: '🇮🇳', name: 'Delhi' },
+  { zone: 'America/New_York', flag: '🇺🇸', name: 'New York' },
+  { zone: 'Europe/London', flag: '🇬🇧', name: 'London' },
+  { zone: 'Asia/Tokyo', flag: '🇯🇵', name: 'Tokyo' },
+  { zone: 'Europe/Paris', flag: '🇫🇷', name: 'Paris' },
+  { zone: 'Europe/Berlin', flag: '🇩🇪', name: 'Berlin' },
+  { zone: 'America/Los_Angeles', flag: '🇺🇸', name: 'Los Angeles' },
+  { zone: 'Australia/Sydney', flag: '🇦🇺', name: 'Sydney' },
+  { zone: 'America/Chicago', flag: '🇺🇸', name: 'Chicago' },
+  { zone: 'America/Denver', flag: '🇺🇸', name: 'Denver' },
+  { zone: 'America/Phoenix', flag: '🇺🇸', name: 'Phoenix' },
+  { zone: 'America/Sao_Paulo', flag: '🇧🇷', name: 'São Paulo' },
+  { zone: 'America/Mexico_City', flag: '🇲🇽', name: 'Mexico City' },
+  { zone: 'Asia/Shanghai', flag: '🇨🇳', name: 'Shanghai' },
+  { zone: 'Asia/Hong_Kong', flag: '🇭🇰', name: 'Hong Kong' },
+  { zone: 'Asia/Singapore', flag: '🇸🇬', name: 'Singapore' },
+  { zone: 'Asia/Dubai', flag: '🇦🇪', name: 'Dubai' },
+  { zone: 'Europe/Moscow', flag: '🇷🇺', name: 'Moscow' },
+  { zone: 'Africa/Johannesburg', flag: '🇿🇦', name: 'Cape Town' },
+  { zone: 'Africa/Cairo', flag: '🇪🇬', name: 'Cairo' },
+  { zone: 'Europe/Rome', flag: '🇮🇹', name: 'Rome' },
+  { zone: 'Europe/Madrid', flag: '🇪🇸', name: 'Madrid' },
+  { zone: 'Asia/Seoul', flag: '🇰🇷', name: 'Seoul' },
+  { zone: 'Asia/Jakarta', flag: '🇮🇩', name: 'Jakarta' },
+  { zone: 'Asia/Bangkok', flag: '🇹🇭', name: 'Bangkok' },
+  { zone: 'Europe/Istanbul', flag: '🇹🇷', name: 'Istanbul' },
+  { zone: 'Asia/Tehran', flag: '🇮🇷', name: 'Tehran' },
+  { zone: 'Europe/Amsterdam', flag: '🇳🇱', name: 'Amsterdam' },
+  { zone: 'Europe/Zurich', flag: '🇨🇭', name: 'Zurich' },
+  { zone: 'Europe/Vienna', flag: '🇦🇹', name: 'Vienna' },
+  // … यहाँ लगभग 200+ entries कॉपी करके पेस्ट करें
 ];
-function renderWorld() {
+
+function renderWorld(){
+  const q = document.getElementById('search-city').value.toLowerCase();
   const grid = document.getElementById('world-grid');
   grid.innerHTML = '';
-  cityList.forEach(c => {
-    const t = new Date().toLocaleTimeString('en-US', { timeZone: c.tz, hour12: false });
-    const nm = lang === 'hi' ? c.name.hi : c.name.en;
-    grid.innerHTML += `
-      <div class="city-card">
-        <div>${c.flag} ${nm}</div>
-        <div>${t}</div>
-      </div>`;
-  });
-}
-setInterval(renderWorld, 1000);
-
-// FILTER
-function filterCities() {
-  const v = document.getElementById('search-city').value.toLowerCase();
-  document.querySelectorAll('.city-card').forEach(card => {
-    card.style.display = card.innerText.toLowerCase().includes(v) ? 'block' : 'none';
-  });
+  cityList
+    .filter(c => c.name.toLowerCase().includes(q))
+    .forEach(c => {
+      const t = new Date().toLocaleTimeString('en-US',{ timeZone: c.zone, hour12: false });
+      grid.innerHTML += `
+        <div class="city-card">
+          ${c.flag} ${c.name}<br>
+          ${t}
+        </div>`;
+    });
 }
 
-// ALARM
-let alarmTime = null;
-function setAlarm() {
-  const time = document.getElementById('alarm-time').value;
-  const tone = document.getElementById('alarm-tone').value;
-  if (time) {
-    alarmTime = time;
-    document.getElementById('alarm-audio').src = tone;
-    document.getElementById('alarm-status').innerText = `${lang==='hi'?'सेट':'Set'}: ${alarmTime}`;
+// 🔔 ALARMS
+function addAlarm(){
+  const t = prompt('समय (HH:MM)?'), l = prompt('नाम?');
+  if(t){
+    cfg.alarms.push({ time: t, label: l });
+    save(); renderControls();
   }
 }
-setInterval(() => {
-  const now = new Date().toTimeString().slice(0, 5);
-  if (alarmTime === now) {
-    document.getElementById('alarm-audio').play();
-    document.getElementById('alarm-status').innerText = '🔔 ' + (lang==='hi'?'अलार्म':'Alarm') + '!';
-    alarmTime = null;
-  }
-}, 1000);
 
-// STOPWATCH
-let sw = 0, swInt = null;
-function updateStop() {
-  document.getElementById('stop-display').innerText =
-    new Date(sw*1000).toISOString().substr(11,8);
+function renderControls(){
+  const c = document.getElementById('controls');
+  c.innerHTML = `
+    <button onclick="addAlarm()">Add Alarm</button>
+    <ul>${cfg.alarms.map((a,i)=>
+      `<li>${a.time} ${a.label} <button onclick="delAlarm(${i})">x</button></li>`
+    ).join('')}</ul>
+    <button onclick="startPomodoro()">Start Pomodoro</button>`;
 }
-function startStopwatch() { if (!swInt) swInt = setInterval(() => { sw++; updateStop(); }, 1000); }
-function stopStopwatch() { clearInterval(swInt); swInt = null; }
-function resetStopwatch() { stopStopwatch(); sw = 0; updateStop(); }
 
-// TIMER
-let timerInt = null, tLeft = 0;
-function startTimer() {
-  const mins = parseInt(document.getElementById('timer-mins').value);
-  if (!isNaN(mins)) {
-    tLeft = mins*60;
-    clearInterval(timerInt);
-    timerInt = setInterval(() => {
-      if (tLeft<=0) {
-        clearInterval(timerInt);
-        document.getElementById('timer-display').innerText = lang==='hi'?'समय समाप्त':'Time Up';
-      } else {
-        document.getElementById('timer-display').innerText =
-          new Date(tLeft*1000).toISOString().substr(14,5);
-        tLeft--;
+function delAlarm(i){
+  cfg.alarms.splice(i,1);
+  save();
+  renderControls();
+}
+
+function checkAlarms(){
+  const now = new Date().toTimeString().slice(0,5);
+  cfg.alarms.forEach(a=>{
+    if(a.time === now){
+      showNotify('Alarm: ' + a.label);
+      logStat('Alarm');
+      a.done = true;
+      save();
+    }
+  });
+}
+
+// 🧭 POMODORO
+function startPomodoro(){
+  document.getElementById('bgMusic').play();
+  setTimeout(()=>{
+    showNotify('Pomodoro Complete');
+    logStat('Pomodoro');
+    document.getElementById('bgMusic').pause();
+  }, 25*60*1000);
+}
+
+// 📊 STATS & CHART
+function logStat(type){
+  const t = new Date().toLocaleTimeString();
+  cfg.stats[t] = type;
+  save();
+  renderStatsChart();
+}
+
+function renderStatsChart(){
+  const ctx = document.getElementById('statsChart').getContext('2d');
+  const labels = Object.keys(cfg.stats);
+  const data = labels.map(_=>1);
+  new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'Events', data }] },
+    options:{
+      plugins:{ legend:{ display:false }},
+      scales:{
+        x:{ title:{ display:true, text:'Time' }},
+        y:{ title:{ display:true, text:'Count' }}
       }
-    }, 1000);
-  }
+    }
+  });
 }
 
-// POMODORO
-let pomoLeft = 1500, pomoInt = null;
-function updatePomo() {
-  document.getElementById('pomo-display').innerText =
-    new Date(pomoLeft*1000).toISOString().substr(14,5);
+// 🌐 VOICE COMMAND
+function startVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Voice commands not supported'); return; }
+  const rec = new SR();
+  rec.lang = 'hi-IN';
+  rec.onresult = e => processVoice(e.results[0][0].transcript);
+  rec.start();
 }
-function startPomodoro() {
-  clearInterval(pomoInt);
-  pomoInt = setInterval(() => {
-    if (pomoLeft<=0) {
-      clearInterval(pomoInt);
-      alert('🍅 पोमोडोरो समाप्त');
-      pomoLeft = 1500; updatePomo();
-    } else { pomoLeft--; updatePomo(); }
-  },1000);
+
+function processVoice(txt){
+  if(/अलार्म/i.test(txt) && /सेट/i.test(txt)) addAlarm();
+  else if(/पॉमोडोरो/i.test(txt)) startPomodoro();
+  else showNotify('Command नहीं समझा: '+txt);
 }
-function resetPomodoro() {
-  clearInterval(pomoInt); pomoLeft = 1500; updatePomo();
+
+// 🔔 NOTIFICATIONS
+function showNotify(txt){
+  if(Notification.permission !== 'granted') Notification.requestPermission();
+  new Notification(txt);
 }
-updatePomo();
+
+// ⏰ INIT
+setupClock();
+renderWorld();
+renderControls();
+renderStatsChart();
+setInterval(renderWorld, 1000);
+setInterval(checkAlarms, 1000);
