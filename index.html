@@ -1,79 +1,35 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>समय - Advanced</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>समय Pro Max</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <aside id="sidebar">
-    <h2>समय</h2>
-    <ul>
-      <li class="active" onclick="switchTab('clock')">डिजिटल घड़ी</li>
-      <li onclick="switchTab('world')">वर्ल्ड क्लॉक</li>
-      <li onclick="switchTab('alarm')">अलार्म</li>
-      <li onclick="switchTab('stopwatch')">स्टॉपवॉच</li>
-      <li onclick="switchTab('timer')">काउंटडाउन</li>
-      <li onclick="switchTab('pomodoro')">पोमोडोरो</li>
-    </ul>
-    <div class="modes">
-      <button onclick="toggleTheme()">🌓 थीम</button>
-      <button onclick="toggleLanguage()">🌐 भाषा</button>
-    </div>
-  </aside>
+  <nav>
+    <button onclick="toggleClockMode()">Analog/Digital</button>
+    <button onclick="toggleTheme()">Theme</button>
+    <button onclick="startVoice()">🎙 Voice Command</button>
+  </nav>
 
-  <main id="content">
-    <section id="clock-tab" class="tab active">
-      <h3>⏰ वर्तमान समय</h3>
-      <div id="digital-clock"></div>
-    </section>
+  <div id="clockContainer"></div>
 
-    <section id="world-tab" class="tab">
-      <h3>🌍 वर्ल्ड क्लॉक</h3>
-      <input type="text" id="search-city" oninput="filterCities()" placeholder="शहर खोजें" />
-      <div id="world-grid"></div>
-    </section>
+  <section id="world-section">
+    <h3>🌍 वर्ल्ड क्लॉक</h3>
+    <input id="search-city" placeholder="शहर खोजें..." oninput="renderWorld()">
+    <div id="world-grid"></div>
+  </section>
 
-    <section id="alarm-tab" class="tab">
-      <h3>🔔 अलार्म सेट करें</h3>
-      <input type="time" id="alarm-time" />
-      <select id="alarm-tone">
-        <option value="tone1.mp3">सॉफ्ट बेल</option>
-        <option value="tone2.mp3">क्लासिक</option>
-        <option value="tone3.mp3">सुबह धुन</option>
-      </select>
-      <button onclick="setAlarm()">सेट करें</button>
-      <p id="alarm-status">---</p>
-      <audio id="alarm-audio" preload="auto"></audio>
-    </section>
+  <section id="controls"></section>
 
-    <section id="stopwatch-tab" class="tab">
-      <h3>⏱ स्टॉपवॉच</h3>
-      <div id="stop-display">00:00:00</div>
-      <div class="ctrl">
-        <button onclick="startStopwatch()">शुरू</button>
-        <button onclick="stopStopwatch()">रोकें</button>
-        <button onclick="resetStopwatch()">रीसेट</button>
-      </div>
-    </section>
+  <section id="stats">
+    <h3>आज की गतिविधियाँ</h3>
+    <canvas id="statsChart" width="400" height="200"></canvas>
+  </section>
 
-    <section id="timer-tab" class="tab">
-      <h3>⌛ काउंटडाउन टाइमर</h3>
-      <input type="number" id="timer-mins" placeholder="मिनट" />
-      <button onclick="startTimer()">शुरू</button>
-      <div id="timer-display">00:00</div>
-    </section>
-
-    <section id="pomodoro-tab" class="tab">
-      <h3>🍅 पोमोडोरो टाइमर</h3>
-      <div id="pomo-display">25:00</div>
-      <div class="ctrl">
-        <button onclick="startPomodoro()">शुरू</button>
-        <button onclick="resetPomodoro()">रीसेट</button>
-      </div>
-    </section>
-  </main>
+  <audio id="bgMusic" loop src="https://cdn.jsdelivr.net/gh/maitraysuthar/sounds@main/focus.mp3"></audio>
 
   <script src="app.js"></script>
 </body>
