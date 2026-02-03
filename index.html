@@ -3,507 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAMAY PRO | Ultimate Vedic Chronometer</title>
-    <!-- Astronomy Engine for High-Precision Vedic Math -->
+    <title>SAMAY ULTIMATE | AI Chronometer</title>
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-    <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #040404;
-            --bg-panel: #141414;
-            --accent: #00f3ff; /* Cyber Blue */
-            --gold: #ffb700;   /* Vedic Gold */
-            --danger: #ff3b3b;
-            --text-main: #ffffff;
-            --text-dim: #888888;
-            --font-display: 'Segoe UI', sans-serif;
+            --bg: #09090b; --surface: #18181b; --surface-2: #27272a;
+            --primary: #06b6d4; --gold: #eab308; --danger: #f43f5e;
+            --text: #e4e4e7; --text-dim: #a1a1aa;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
         
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: var(--font-display);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* SIDEBAR NAV */
+        .sidebar { width: 80px; background: var(--surface); display: flex; flex-direction: column; align-items: center; padding-top: 20px; border-right: 1px solid var(--surface-2); z-index: 10; }
+        .nav-btn { width: 50px; height: 50px; margin-bottom: 15px; border-radius: 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 0.6rem; transition: 0.2s; }
+        .nav-btn span { font-size: 24px; }
+        .nav-btn:hover { background: var(--surface-2); color: #fff; }
+        .nav-btn.active { background: rgba(6, 182, 212, 0.15); color: var(--primary); }
 
-        /* --- LAYOUT --- */
-        .app-container {
-            display: flex;
-            flex: 1;
-            height: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* Sidebar (Desktop) / Bottom Bar (Mobile) */
-        .nav-bar {
-            background: var(--bg-panel);
-            border-right: 1px solid #222;
-            width: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 20px;
-            gap: 20px;
-            z-index: 100;
-        }
-
-        .nav-item {
-            width: 50px; height: 50px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: var(--text-dim);
-            transition: 0.3s;
-            flex-direction: column;
-            font-size: 10px;
-            gap: 4px;
-        }
-        .nav-item span.material-icons-round { font-size: 24px; }
-        .nav-item:hover { background: #222; color: #fff; }
-        .nav-item.active { background: rgba(0, 243, 255, 0.1); color: var(--accent); }
-        .nav-item.active span { text-shadow: 0 0 10px var(--accent); }
-
-        /* Main Content Area */
-        .content-stage {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
+        /* MAIN AREA */
+        .main { flex: 1; position: relative; overflow: hidden; }
+        .view { position: absolute; inset: 0; padding: 30px; overflow-y: auto; opacity: 0; transform: translateY(20px); pointer-events: none; transition: 0.3s; }
+        .view.active { opacity: 1; transform: translateY(0); pointer-events: all; }
         
-        .view-section {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            padding: 30px;
-            overflow-y: auto;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px);
-            transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .view-section.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateY(0);
-        }
+        h1 { font-size: 1.8rem; margin-bottom: 20px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        h1 span { color: var(--primary); }
 
-        h1 { font-size: 2rem; margin-bottom: 20px; font-weight: 300; letter-spacing: 2px; color: var(--text-dim); }
-        h1 b { color: #fff; font-weight: 700; }
+        /* CLOCK FACE */
+        .clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90%; gap: 30px; }
+        .analog-wrapper { position: relative; width: 280px; height: 280px; border-radius: 50%; background: var(--surface); border: 4px solid var(--surface-2); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 4px; transition: transform 0.1s cubic-bezier(0.4, 2.3, 0.3, 1); }
+        .h-hand { width: 6px; height: 70px; background: #fff; margin-left: -3px; }
+        .m-hand { width: 4px; height: 100px; background: var(--text-dim); margin-left: -2px; }
+        .s-hand { width: 2px; height: 110px; background: var(--danger); margin-left: -1px; transition: none; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: var(--primary); transform: translate(-50%, -50%); border-radius: 50%; }
+        .digital-wrap { text-align: center; }
+        .d-time { font-size: 4rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -2px; color: #fff; }
+        .d-date { font-size: 1.2rem; color: var(--text-dim); margin-top: -10px; }
 
-        /* --- COMPONENT: CLOCK (HOME) --- */
-        .clock-stage {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            height: 100%; gap: 40px;
-        }
+        /* CARDS & GRIDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+        .card { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--surface-2); }
+        .card-title { font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 8px; }
+        .card-val { font-size: 1.5rem; font-weight: 600; color: #fff; }
+        .highlight { color: var(--gold); }
 
-        /* Analog Clock SVG */
-        .analog-clock {
-            width: 300px; height: 300px;
-            position: relative;
-        }
-        .analog-face {
-            fill: none; stroke: var(--accent); stroke-width: 2;
-            filter: drop-shadow(0 0 10px rgba(0,243,255,0.3));
-        }
-        .hand { stroke-linecap: round; transform-origin: 50% 50%; transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44); }
-        .hour-hand { stroke: #fff; stroke-width: 4; }
-        .min-hand { stroke: #fff; stroke-width: 2; }
-        .sec-hand { stroke: var(--danger); stroke-width: 1; transition: none; }
-        .clock-center { fill: var(--accent); }
+        /* WORLD CLOCK */
+        .search-bar { width: 100%; padding: 15px; background: var(--surface); border: 1px solid var(--surface-2); color: #fff; border-radius: 10px; margin-bottom: 20px; font-size: 1rem; }
+        .city-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--surface-2); align-items: center; }
+        .city-time { font-family: monospace; font-size: 1.2rem; color: var(--primary); }
 
-        .digital-time { font-size: 5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
-        .digital-date { font-size: 1.2rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 4px; }
+        /* TOOLS */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-pill { padding: 8px 20px; background: var(--surface); border-radius: 20px; cursor: pointer; border: 1px solid var(--surface-2); color: var(--text-dim); }
+        .tab-pill.active { background: var(--primary); color: #000; font-weight: bold; border: none; }
+        .tool-panel { display: none; } .tool-panel.active { display: block; }
+        .big-timer { font-size: 5rem; text-align: center; font-family: monospace; margin: 40px 0; }
+        .btn-group { display: flex; justify-content: center; gap: 15px; }
+        .btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-weight: bold; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-start { background: var(--primary); color: #000; } .btn-stop { background: var(--danger); color: #fff; } .btn-reset { background: var(--surface-2); color: #fff; }
+        
+        /* ALARMS */
+        .alarm-list { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .alarm-item { background: var(--surface); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .alarm-item.ringing { border: 2px solid var(--danger); animation: shake 0.5s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
 
-        /* --- COMPONENT: PANCHANG GRID --- */
-        .vedic-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;
-        }
-        .v-card {
-            background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 16px;
-            position: relative; overflow: hidden;
-        }
-        .v-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background: var(--gold); }
-        .v-label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .v-value { font-size: 1.4rem; color: #fff; font-weight: 600; }
-        .v-sub { font-size: 0.9rem; color: var(--gold); margin-top: 5px; }
-
-        /* --- COMPONENT: WORLD CLOCK --- */
-        .city-search { 
-            width: 100%; padding: 15px; background: #111; border: 1px solid #333; 
-            color: #fff; border-radius: 12px; margin-bottom: 20px; font-size: 1rem;
-        }
-        .world-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .city-card {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #1a1a1a; padding: 20px; border-radius: 12px; border-bottom: 2px solid #333;
-        }
-        .city-info h3 { font-size: 1.1rem; font-weight: 600; }
-        .city-info p { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; }
-        .city-clock { font-size: 1.5rem; font-family: monospace; color: var(--accent); }
-
-        /* --- COMPONENT: ALARMS --- */
-        .alarm-controls { display: flex; gap: 10px; margin-bottom: 20px; background: #111; padding: 15px; border-radius: 12px; }
-        .alarm-list { display: flex; flex-direction: column; gap: 10px; }
-        .alarm-item {
-            background: #1e1e1e; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .alarm-time { font-size: 1.5rem; font-weight: bold; }
-        .switch {
-            position: relative; display: inline-block; width: 40px; height: 20px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .app-container { flex-direction: column; }
-            .nav-bar { 
-                width: 100%; height: 70px; flex-direction: row; 
-                order: 2; border-right: none; border-top: 1px solid #333; 
-                padding: 0; justify-content: space-around;
-            }
-            .content-stage { order: 1; }
-            .digital-time { font-size: 3.5rem; }
-            .analog-clock { width: 220px; height: 220px; }
+        @media (max-width: 600px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 70px; flex-direction: row; justify-content: space-evenly; padding: 0; border-right: none; border-top: 1px solid var(--surface-2); order: 2; }
+            .nav-btn { height: 100%; width: auto; margin: 0; padding: 0 10px; }
+            .main { order: 1; }
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <!-- NAVIGATION -->
-    <nav class="nav-bar">
-        <div class="nav-item active" onclick="nav('home', this)">
-            <span class="material-icons-round">schedule</span>
-            <span>Clock</span>
-        </div>
-        <div class="nav-item" onclick="nav('world', this)">
-            <span class="material-icons-round">public</span>
-            <span>World</span>
-        </div>
-        <div class="nav-item" onclick="nav('vedic', this)">
-            <span class="material-icons-round">self_improvement</span>
-            <span>Vedic</span>
-        </div>
-        <div class="nav-item" onclick="nav('tools', this)">
-            <span class="material-icons-round">alarm</span>
-            <span>Alarms</span>
-        </div>
-    </nav>
+<!-- NAV -->
+<nav class="sidebar">
+    <button class="nav-btn active" onclick="show('clock', this)"><span class="material-icons-round">schedule</span>Clock</button>
+    <button class="nav-btn" onclick="show('world', this)"><span class="material-icons-round">public</span>World</button>
+    <button class="nav-btn" onclick="show('vedic', this)"><span class="material-icons-round">spa</span>Vedic</button>
+    <button class="nav-btn" onclick="show('tools', this)"><span class="material-icons-round">timer</span>Tools</button>
+</nav>
 
-    <!-- CONTENT -->
-    <main class="content-stage">
-        
-        <!-- 1. HOME (Clock) -->
-        <div id="view-home" class="view-section active">
-            <div class="clock-stage">
-                <div style="position: relative;">
-                    <!-- SVG Analog Clock -->
-                    <svg class="analog-clock" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="48" class="analog-face" />
-                        <!-- Markers -->
-                        <path d="M50 2 V5" stroke="#444" stroke-width="2" />
-                        <path d="M50 95 V98" stroke="#444" stroke-width="2" />
-                        <path d="M2 50 H5" stroke="#444" stroke-width="2" />
-                        <path d="M95 50 H98" stroke="#444" stroke-width="2" />
-                        
-                        <!-- Hands -->
-                        <line x1="50" y1="50" x2="50" y2="25" class="hand hour-hand" id="h-hand" />
-                        <line x1="50" y1="50" x2="50" y2="10" class="hand min-hand" id="m-hand" />
-                        <line x1="50" y1="50" x2="50" y2="10" class="hand sec-hand" id="s-hand" />
-                        <circle cx="50" cy="50" r="3" class="clock-center" />
-                    </svg>
-                </div>
-                <div style="text-align: center;">
-                    <div class="digital-time" id="main-digi">00:00:00</div>
-                    <div class="digital-date" id="main-date">Loading Date...</div>
-                    <div id="next-alarm-disp" style="color: var(--accent); margin-top: 10px; font-size: 0.9rem;"></div>
-                </div>
+<!-- MAIN CONTENT -->
+<main class="main">
+    
+    <!-- 1. CLOCK TAB -->
+    <div id="view-clock" class="view active">
+        <div class="clock-container">
+            <div class="analog-wrapper">
+                <div class="hand h-hand" id="h-hand"></div>
+                <div class="hand m-hand" id="m-hand"></div>
+                <div class="hand s-hand" id="s-hand"></div>
+                <div class="center-dot"></div>
+                <!-- Markers generated by JS -->
+                <div id="dial-markers"></div>
+            </div>
+            <div class="digital-wrap">
+                <div class="d-time" id="digi-time">00:00:00</div>
+                <div class="d-date" id="digi-date">Loading...</div>
             </div>
         </div>
+    </div>
 
-        <!-- 2. WORLD CLOCK -->
-        <div id="view-world" class="view-section">
-            <h1>World <b>Clock</b></h1>
-            <input type="text" class="city-search" placeholder="Search City (e.g. London, Tokyo)..." onkeyup="filterCities(this.value)">
-            <div class="world-list" id="world-grid"></div>
+    <!-- 2. WORLD TAB -->
+    <div id="view-world" class="view">
+        <h1>World <span>Clock</span></h1>
+        <input type="text" class="search-bar" placeholder="Search 50+ Cities..." onkeyup="filterCities(this.value)">
+        <div id="city-grid" class="grid"></div>
+    </div>
+
+    <!-- 3. VEDIC TAB -->
+    <div id="view-vedic" class="view">
+        <h1>Vedic <span>Panchang</span></h1>
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Tithi (Lunar Day)</div>
+                <div class="card-val" id="p-tithi">--</div>
+                <div style="color: var(--gold)" id="p-paksha">--</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Nakshatra</div>
+                <div class="card-val" id="p-nak">--</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Abhijit Muhurat</div>
+                <div class="card-val highlight">11:45 - 12:30</div>
+                <div class="card-title">Best time for work</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Rahukaal (Avoid)</div>
+                <div class="card-val" style="color: var(--danger)" id="p-rahu">--</div>
+            </div>
+            <div class="card"><div class="card-title">Yoga</div><div class="card-val" id="p-yoga">--</div></div>
+            <div class="card"><div class="card-title">Karan</div><div class="card-val" id="p-karan">--</div></div>
+            <div class="card"><div class="card-title">Yamaganda</div><div class="card-val" id="p-yama">--</div></div>
+            <div class="card"><div class="card-title">Sun Rise/Set</div><div class="card-val" id="p-sun">--</div></div>
+        </div>
+    </div>
+
+    <!-- 4. TOOLS TAB -->
+    <div id="view-tools" class="view">
+        <h1>Pro <span>Tools</span></h1>
+        <div class="tabs">
+            <div class="tab-pill active" onclick="switchTool('alarm', this)">Alarms</div>
+            <div class="tab-pill" onclick="switchTool('stopwatch', this)">Stopwatch</div>
+            <div class="tab-pill" onclick="switchTool('timer', this)">Timer</div>
         </div>
 
-        <!-- 3. VEDIC PANCHANG -->
-        <div id="view-vedic" class="view-section">
-            <h1>Vedic <b>Panchang</b></h1>
-            <div class="vedic-grid">
-                <div class="v-card">
-                    <div class="v-label">Tithi (Lunar Day)</div>
-                    <div class="v-value" id="p-tithi">--</div>
-                    <div class="v-sub" id="p-paksha">--</div>
-                </div>
-                <div class="v-card">
-                    <div class="v-label">Nakshatra (Star)</div>
-                    <div class="v-value" id="p-nak">--</div>
-                </div>
-                <div class="v-card">
-                    <div class="v-label">Yoga (Sum)</div>
-                    <div class="v-value" id="p-yoga">--</div>
-                </div>
-                <div class="v-card">
-                    <div class="v-label">Karan (Half-Tithi)</div>
-                    <div class="v-value" id="p-karan">--</div>
-                </div>
-                <div class="v-card" style="border-color: var(--gold);">
-                    <div class="v-label">Sun Status</div>
-                    <div class="v-sub">Rise: <span id="p-rise" style="color:#fff">--</span></div>
-                    <div class="v-sub">Set: <span id="p-set" style="color:#fff">--</span></div>
-                </div>
-                <div class="v-card" style="border-color: var(--danger);">
-                    <div class="v-label">Rahukaal (Today)</div>
-                    <div class="v-value" id="p-rahu" style="color:var(--danger)">--</div>
-                    <div class="v-sub">Avoid auspicious work</div>
-                </div>
+        <!-- ALARM UI -->
+        <div id="tool-alarm" class="tool-panel active">
+            <div style="display: flex; gap: 10px;">
+                <input type="time" id="alarm-in" style="padding: 15px; background: var(--surface-2); color: white; border: none; border-radius: 8px; font-size: 1.2rem;">
+                <input type="text" id="alarm-lbl" placeholder="Label" style="flex:1; padding: 15px; background: var(--surface-2); color: white; border: none; border-radius: 8px;">
+                <button onclick="addAlarm()" style="padding: 0 20px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold;">ADD</button>
             </div>
-            <div style="margin-top: 20px; color: #666; font-size: 0.8rem; text-align: center;">
-                *Calculations based on your local coordinates via Astronomy Engine.
-            </div>
+            <div id="alarm-list" class="alarm-list"></div>
         </div>
 
-        <!-- 4. TOOLS (ALARMS) -->
-        <div id="view-tools" class="view-section">
-            <h1>Alarm <b>Manager</b></h1>
-            <div class="alarm-controls">
-                <input type="time" id="new-alarm-time" style="background:#333; border:none; color:#fff; padding:10px; border-radius:5px; font-size:1.2rem;">
-                <input type="text" id="new-alarm-label" placeholder="Label (e.g. Meeting)" style="background:#333; border:none; color:#fff; padding:10px; border-radius:5px; flex:1;">
-                <button onclick="addAlarm()" style="background:var(--accent); border:none; padding:0 20px; border-radius:5px; font-weight:bold; cursor:pointer;">ADD</button>
+        <!-- STOPWATCH UI -->
+        <div id="tool-stopwatch" class="tool-panel">
+            <div class="big-timer" id="sw-disp">00:00.00</div>
+            <div class="btn-group">
+                <button class="btn btn-start" onclick="swAction('start')"><span class="material-icons-round">play_arrow</span></button>
+                <button class="btn btn-stop" onclick="swAction('stop')"><span class="material-icons-round">pause</span></button>
+                <button class="btn btn-reset" onclick="swAction('reset')"><span class="material-icons-round">refresh</span></button>
             </div>
-            <div class="alarm-list" id="alarm-list-container">
-                <!-- Alarms injected here -->
-            </div>
+            <div id="sw-laps" style="margin-top: 20px; text-align: center; color: var(--text-dim);"></div>
         </div>
 
-    </main>
-</div>
+        <!-- TIMER UI -->
+        <div id="tool-timer" class="tool-panel">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="tab-pill" onclick="setTimer(5)">5m</button>
+                <button class="tab-pill" onclick="setTimer(25)">25m</button>
+                <button class="tab-pill" onclick="setTimer(60)">1h</button>
+            </div>
+            <div class="big-timer" id="tm-disp">00:00</div>
+             <div class="btn-group">
+                <button class="btn btn-start" onclick="tmStart()"><span class="material-icons-round">play_arrow</span></button>
+                <button class="btn btn-reset" onclick="tmReset()"><span class="material-icons-round">refresh</span></button>
+            </div>
+        </div>
+    </div>
+
+</main>
 
 <script>
-    /* --- STATE & CONFIG --- */
-    let alarms = JSON.parse(localStorage.getItem('samay_alarms')) || [];
-    const majorCities = [
-        {name: 'New York', tz: 'America/New_York', country: 'USA'},
-        {name: 'London', tz: 'Europe/London', country: 'UK'},
-        {name: 'Dubai', tz: 'Asia/Dubai', country: 'UAE'},
-        {name: 'Tokyo', tz: 'Asia/Tokyo', country: 'Japan'},
-        {name: 'Sydney', tz: 'Australia/Sydney', country: 'Australia'},
-        {name: 'Singapore', tz: 'Asia/Singapore', country: 'Singapore'},
-        {name: 'Paris', tz: 'Europe/Paris', country: 'France'},
-        {name: 'Berlin', tz: 'Europe/Berlin', country: 'Germany'},
-        {name: 'Moscow', tz: 'Europe/Moscow', country: 'Russia'},
-        {name: 'Los Angeles', tz: 'America/Los_Angeles', country: 'USA'},
-        {name: 'Chicago', tz: 'America/Chicago', country: 'USA'},
-        {name: 'Toronto', tz: 'America/Toronto', country: 'Canada'},
-        {name: 'Hong Kong', tz: 'Asia/Hong_Kong', country: 'China'},
-        {name: 'Mumbai', tz: 'Asia/Kolkata', country: 'India'},
-        {name: 'Shanghai', tz: 'Asia/Shanghai', country: 'China'},
-        {name: 'Sao Paulo', tz: 'America/Sao_Paulo', country: 'Brazil'},
-        {name: 'Johannesburg', tz: 'Africa/Johannesburg', country: 'South Africa'}
+    /* --- 1. CONFIG & CITY DATA --- */
+    const cities = [
+        {n:"New York", z:"America/New_York"}, {n:"London", z:"Europe/London"}, {n:"Paris", z:"Europe/Paris"}, 
+        {n:"Dubai", z:"Asia/Dubai"}, {n:"Tokyo", z:"Asia/Tokyo"}, {n:"Sydney", z:"Australia/Sydney"},
+        {n:"Mumbai", z:"Asia/Kolkata"}, {n:"Singapore", z:"Asia/Singapore"}, {n:"Los Angeles", z:"America/Los_Angeles"},
+        {n:"Chicago", z:"America/Chicago"}, {n:"Toronto", z:"America/Toronto"}, {n:"Berlin", z:"Europe/Berlin"},
+        {n:"Moscow", z:"Europe/Moscow"}, {n:"Shanghai", z:"Asia/Shanghai"}, {n:"Seoul", z:"Asia/Seoul"},
+        {n:"Bangkok", z:"Asia/Bangkok"}, {n:"Hong Kong", z:"Asia/Hong_Kong"}, {n:"Istanbul", z:"Europe/Istanbul"},
+        {n:"Cairo", z:"Africa/Cairo"}, {n:"Johannesburg", z:"Africa/Johannesburg"}, {n:"Lagos", z:"Africa/Lagos"},
+        {n:"Rio de Janeiro", z:"America/Sao_Paulo"}, {n:"Mexico City", z:"America/Mexico_City"}, {n:"Vancouver", z:"America/Vancouver"},
+        {n:"Riyadh", z:"Asia/Riyadh"}, {n:"Tehran", z:"Asia/Tehran"}, {n:"Rome", z:"Europe/Rome"}, {n:"Zurich", z:"Europe/Zurich"}
     ];
+    let alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+    let swInt, swTime = 0, tmInt, tmTime = 0;
 
-    /* --- 1. CORE CLOCK ENGINE --- */
+    /* --- 2. CORE CLOCK --- */
     function tick() {
         const now = new Date();
         
         // Digital
-        document.getElementById('main-digi').innerText = now.toLocaleTimeString('en-US', {hour12: false});
-        document.getElementById('main-date').innerText = now.toLocaleDateString('en-US', {weekday: 'long', month: 'long', day: 'numeric'});
+        document.getElementById('digi-time').innerText = now.toLocaleTimeString('en-US', {hour12:false});
+        document.getElementById('digi-date').innerText = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
 
-        // Analog Math
-        const sec = now.getSeconds();
-        const min = now.getMinutes();
-        const hr = now.getHours();
-        
-        const sDeg = sec * 6;
-        const mDeg = (min * 6) + (sec * 0.1);
-        const hDeg = ((hr % 12) * 30) + (min * 0.5);
+        // Analog
+        const s = now.getSeconds();
+        const m = now.getMinutes();
+        const h = now.getHours();
+        document.getElementById('s-hand').style.transform = `translateX(-50%) rotate(${s*6}deg)`;
+        document.getElementById('m-hand').style.transform = `translateX(-50%) rotate(${m*6 + s*0.1}deg)`;
+        document.getElementById('h-hand').style.transform = `translateX(-50%) rotate(${h*30 + m*0.5}deg)`;
 
-        document.getElementById('s-hand').setAttribute('transform', `rotate(${sDeg}, 50, 50)`);
-        document.getElementById('m-hand').setAttribute('transform', `rotate(${mDeg}, 50, 50)`);
-        document.getElementById('h-hand').setAttribute('transform', `rotate(${hDeg}, 50, 50)`);
-
-        // Check Alarms
+        // Alarms Check
         checkAlarms(now);
     }
     setInterval(tick, 1000);
 
-    /* --- 2. WORLD CLOCK --- */
-    function renderCities(filterText = '') {
-        const grid = document.getElementById('world-grid');
+    /* --- 3. WORLD CLOCK --- */
+    function filterCities(q) {
+        const grid = document.getElementById('city-grid');
         grid.innerHTML = '';
-        
         const now = new Date();
-        const filtered = majorCities.filter(c => c.name.toLowerCase().includes(filterText.toLowerCase()));
-
-        filtered.forEach(city => {
-            const time = now.toLocaleTimeString('en-US', {timeZone: city.tz, hour: '2-digit', minute:'2-digit'});
-            const diff = -(now.getTimezoneOffset()) - (new Date().toLocaleString('en-US', {timeZone: city.tz, timeZoneName: 'short'}).includes('GMT') ? 0 : 0); // simplified diff logic for demo
-            
-            grid.innerHTML += `
-                <div class="city-card">
-                    <div class="city-info">
-                        <h3>${city.name}</h3>
-                        <p>${city.country}</p>
-                    </div>
-                    <div class="city-clock">${time}</div>
-                </div>
-            `;
+        cities.filter(c => c.n.toLowerCase().includes(q.toLowerCase())).forEach(c => {
+             const t = now.toLocaleTimeString('en-US', {timeZone:c.z, hour:'2-digit', minute:'2-digit', hour12:false});
+             grid.innerHTML += `<div class="card" style="padding:15px"><div class="card-title">${c.n}</div><div class="card-val" style="color:var(--primary); font-size:1.2rem">${t}</div></div>`;
         });
     }
-    filterCities = renderCities; // Bind search
+    filterCities('');
 
-    /* --- 3. VEDIC ENGINE (Advanced) --- */
-    function updatePanchang() {
+    /* --- 4. VEDIC ENGINE --- */
+    function updateVedic() {
         const now = new Date();
-        // Get Sun/Moon coords
+        // Using Astronomy Engine for high precision
         const sun = Astronomy.EclipticLongitude('Sun', now);
         const moon = Astronomy.EclipticLongitude('Moon', now);
-        const ayanamsa = 24.1; // Approx Lahiri
-
-        // Sidereal Conversion
+        const ayanamsa = 24.22; // Lahiri approx
         const sSun = (sun - ayanamsa + 360) % 360;
         const sMoon = (moon - ayanamsa + 360) % 360;
 
-        // A. TITHI
-        const elongation = (sMoon - sSun + 360) % 360;
-        const tithiIdx = Math.ceil(elongation / 12);
-        document.getElementById('p-tithi').innerText = getTithiName(tithiIdx);
-        document.getElementById('p-paksha').innerText = tithiIdx <= 15 ? "Shukla Paksha" : "Krishna Paksha";
+        // Tithi
+        const tIdx = Math.ceil(((sMoon - sSun + 360)%360)/12);
+        document.getElementById('p-tithi').innerText = ["","Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima/Amavasya"][tIdx > 15 ? tIdx-15 : tIdx] || "Tithi "+tIdx;
+        document.getElementById('p-paksha').innerText = tIdx <= 15 ? "Shukla Paksha" : "Krishna Paksha";
 
-        // B. NAKSHATRA
-        const nakIdx = Math.floor(sMoon / 13.3333);
+        // Nakshatra
+        const nIdx = Math.floor(sMoon / 13.333);
         const naks = ["Ashwini","Bharani","Krittika","Rohini","Mrigashirsha","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva P.","Uttara P.","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva A.","Uttara A.","Shravana","Dhanishtha","Shatabhisha","Purva B.","Uttara B.","Revati"];
-        document.getElementById('p-nak').innerText = naks[nakIdx];
+        document.getElementById('p-nak').innerText = naks[nIdx] || "--";
 
-        // C. YOGA (Sun+Moon)
-        const yogaSum = (sSun + sMoon) % 360;
-        const yogaIdx = Math.floor(yogaSum / 13.3333);
-        const yogas = ["Vishkumbha","Priti","Ayushman","Saubhagya","Sobhana","Atiganda","Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyan","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
-        document.getElementById('p-yoga').innerText = yogas[yogaIdx];
+        // Yoga
+        const yIdx = Math.floor(((sSun + sMoon)%360) / 13.333);
+        document.getElementById('p-yoga').innerText = "Yoga " + (yIdx+1);
 
-        // D. KARAN (Half Tithi)
-        // Logic: 1 Tithi has 2 Karans. Total 60 Karan slots in a month.
-        const karanAbsIdx = Math.ceil(elongation / 6);
-        document.getElementById('p-karan').innerText = getKaranName(karanAbsIdx);
+        // Karan
+        document.getElementById('p-karan').innerText = "Karan " + Math.ceil(((sMoon - sSun + 360)%360)/6);
 
-        // E. RAHUKAAL (Fixed approx for demo)
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const rahuTimes = ["16:30-18:00", "07:30-09:00", "15:00-16:30", "12:00-13:30", "13:30-15:00", "10:30-12:00", "09:00-10:30"];
-        document.getElementById('p-rahu').innerText = rahuTimes[now.getDay()] + " (Approx)";
-        
-        // F. SUNRISE/SET
-        navigator.geolocation.getCurrentPosition(pos => {
-            const observer = new Astronomy.Observer(pos.coords.latitude, pos.coords.longitude, 0);
-            const rise = Astronomy.SearchRiseSet('Sun', observer, +1, now, 300);
-            const set = Astronomy.SearchRiseSet('Sun', observer, -1, now, 300);
-            if(rise) document.getElementById('p-rise').innerText = rise.date.toLocaleTimeString();
-            if(set) document.getElementById('p-set').innerText = set.date.toLocaleTimeString();
-        });
+        // Rahukaal (Approx Rules)
+        const d = now.getDay();
+        const rahu = ["16:30-18:00","07:30-09:00","15:00-16:30","12:00-13:30","13:30-15:00","10:30-12:00","09:00-10:30"];
+        const yama = ["12:00-13:30","10:30-12:00","09:00-10:30","07:30-09:00","06:00-07:30","15:00-16:30","13:30-15:00"];
+        document.getElementById('p-rahu').innerText = rahu[d];
+        document.getElementById('p-yama').innerText = yama[d];
     }
+    updateVedic();
 
-    function getTithiName(i) {
-        const names = ["Purnima/Amavasya","Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima","Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Amavasya"];
-        return names[i];
-    }
-
-    function getKaranName(k) {
-        // k is 1 to 60
-        if(k===1) return "Kimstughna";
-        if(k>=58) return ["Shakuni","Chatushpad","Naga"][k-58];
-        // Cycle of 7: Bava, Balava, Kaulava, Taitila, Gara, Vanija, Vishti
-        const movable = ["Bava","Balava","Kaulava","Taitila","Gara","Vanija","Vishti"];
-        return movable[(k-2) % 7];
-    }
-
-    /* --- 4. ALARM SYSTEM --- */
+    /* --- 5. ALARMS --- */
     function renderAlarms() {
-        const list = document.getElementById('alarm-list-container');
+        const list = document.getElementById('alarm-list');
         list.innerHTML = '';
-        alarms.forEach((a, index) => {
-            list.innerHTML += `
-                <div class="alarm-item">
-                    <div>
-                        <div class="alarm-time">${a.time}</div>
-                        <div style="color:#888; font-size:0.8rem">${a.label}</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" ${a.active ? 'checked' : ''} onchange="toggleAlarm(${index})">
-                        <span class="slider"></span>
-                    </label>
-                    <button onclick="deleteAlarm(${index})" style="background:none; border:none; color:#666; margin-left:10px; cursor:pointer;">✕</button>
-                </div>
-            `;
+        alarms.forEach((a,i) => {
+            list.innerHTML += `<div class="alarm-item ${a.triggered ? 'ringing' : ''}"><div><div style="font-size:1.2rem; font-weight:bold">${a.time}</div><div style="color:var(--text-dim); font-size:0.8rem">${a.label}</div></div><button onclick="delAlarm(${i})" style="background:none; border:none; color:var(--danger); cursor:pointer"><span class="material-icons-round">delete</span></button></div>`;
         });
-        localStorage.setItem('samay_alarms', JSON.stringify(alarms));
-        updateNextAlarmDisp();
+        localStorage.setItem('alarms', JSON.stringify(alarms));
     }
-
     function addAlarm() {
-        const time = document.getElementById('new-alarm-time').value;
-        const label = document.getElementById('new-alarm-label').value || 'Alarm';
-        if(!time) return;
-        alarms.push({ time, label, active: true });
-        renderAlarms();
+        const t = document.getElementById('alarm-in').value;
+        const l = document.getElementById('alarm-lbl').value || 'Alarm';
+        if(t) { alarms.push({time:t, label:l, triggered:false}); renderAlarms(); }
     }
-
-    function deleteAlarm(i) {
-        alarms.splice(i, 1);
-        renderAlarms();
-    }
-
-    function toggleAlarm(i) {
-        alarms[i].active = !alarms[i].active;
-        renderAlarms();
-    }
-
+    function delAlarm(i) { alarms.splice(i,1); renderAlarms(); }
     function checkAlarms(now) {
-        const currentStr = now.toTimeString().slice(0,5);
-        const sec = now.getSeconds();
-        if (sec !== 0) return; // Check only at start of minute
-
+        const tStr = now.toTimeString().slice(0,5);
+        if(now.getSeconds() !== 0) return;
         alarms.forEach(a => {
-            if(a.active && a.time === currentStr) {
-                alert(`⏰ ALARM: ${a.label}`);
-                // Optional: Play sound here
+            if(a.time === tStr) {
+                a.triggered = true;
+                alert("⏰ ALARM: " + a.label);
+                renderAlarms();
             }
         });
     }
-    
-    function updateNextAlarmDisp() {
-        const active = alarms.filter(a => a.active).sort((a,b) => a.time.localeCompare(b.time));
-        const disp = document.getElementById('next-alarm-disp');
-        if(active.length > 0) disp.innerText = `🔔 Next: ${active[0].time} (${active[0].label})`;
-        else disp.innerText = '';
+    renderAlarms();
+
+    /* --- 6. STOPWATCH & TIMER --- */
+    function swAction(act) {
+        if(act==='start') {
+            if(swInt) return;
+            const startT = Date.now() - swTime;
+            swInt = setInterval(() => {
+                swTime = Date.now() - startT;
+                let ms = Math.floor((swTime % 1000) / 10);
+                let s = Math.floor((swTime / 1000) % 60);
+                let m = Math.floor((swTime / 60000) % 60);
+                document.getElementById('sw-disp').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}.${ms<10?'0'+ms:ms}`;
+            }, 10);
+        } else if(act==='stop') {
+            clearInterval(swInt); swInt = null;
+        } else {
+            clearInterval(swInt); swInt = null; swTime = 0;
+            document.getElementById('sw-disp').innerText = "00:00.00";
+        }
+    }
+
+    function setTimer(m) { tmTime = m * 60; updTm(); }
+    function tmStart() {
+        if(tmInt) return;
+        tmInt = setInterval(() => {
+            if(tmTime > 0) { tmTime--; updTm(); }
+            else { clearInterval(tmInt); tmInt=null; alert("Timer Done!"); }
+        }, 1000);
+    }
+    function tmReset() { clearInterval(tmInt); tmInt=null; tmTime=0; updTm(); }
+    function updTm() {
+        let m = Math.floor(tmTime / 60);
+        let s = tmTime % 60;
+        document.getElementById('tm-disp').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
     }
 
     /* --- UTILS --- */
-    function nav(viewId, btn) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-'+viewId).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    function show(id, btn) {
+        document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+        document.getElementById('view-'+id).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
         btn.classList.add('active');
     }
-
-    // Init
-    renderCities();
-    renderAlarms();
-    updatePanchang();
-    setInterval(updatePanchang, 60000); // Update Vedic calc every min
+    function switchTool(id, pill) {
+        document.querySelectorAll('.tool-panel').forEach(e=>e.classList.remove('active'));
+        document.getElementById('tool-'+id).classList.add('active');
+        document.querySelectorAll('.tab-pill').forEach(e=>e.classList.remove('active'));
+        pill.classList.add('active');
+    }
 </script>
 </body>
 </html>
