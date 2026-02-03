@@ -1,13 +1,1 @@
-body { margin:0; font-family:sans-serif; text-align:center; background:#f5f5f5; color:#333; }
-.dark { background:#222; color:#eee; }
-nav { background:#4a90e2; padding:10px; }
-nav button { margin:0 5px; padding:8px 12px; color:#fff; background:none; border:1px solid #fff; border-radius:4px; cursor:pointer; }
-#clockContainer { font-size:4rem; margin:20px 0; }
-#world-section { margin:20px auto; max-width:500px; }
-#search-city { width:80%; padding:8px; font-size:1rem; }
-#world-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:10px; margin-top:10px; }
-.city-card { background:#fff; padding:8px; border-radius:4px; box-shadow:0 0 5px rgba(0,0,0,0.1); }
-#controls { margin:20px auto; width:300px; }
-button,input { margin:4px; padding:6px; }
-#stats { margin:20px auto; max-width:400px; }
-canvas { background:#fff; border:1px solid #ccc; border-radius:6px; }
+
