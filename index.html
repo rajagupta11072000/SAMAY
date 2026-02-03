@@ -1,243 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAMAY 3.0 | Ultimate Chronometer</title>
-    <!-- Astronomy Engine for Vedic Calc -->
-    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-    <style>
-        :root {
-            --bg: #050505;
-            --panel: #121212;
-            --neon-blue: #00f0ff;
-            --neon-gold: #ffaa00;
-            --danger: #ff2a2a;
-            --text: #e0e0e0;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
-        
-        .app-shell {
-            width: 100%; max-width: 480px; background: var(--panel);
-            display: flex; flex-direction: column; height: 100vh;
-            border-left: 1px solid #333; border-right: 1px solid #333;
-        }
+<meta charset="UTF-8">
+<title>SAMAY 2.0 — Legendary Time Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* Header */
-        .header {
-            padding: 20px; text-align: center;
-            background: linear-gradient(180deg, rgba(0,240,255,0.1), transparent);
-        }
-        .main-time { font-size: 3rem; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 15px rgba(0,240,255,0.3); }
-        .ai-strip { 
-            background: #1a1a1a; padding: 10px; margin: 10px 20px; border-radius: 8px;
-            border-left: 3px solid var(--neon-gold); font-size: 0.85rem; display: flex; gap: 10px; align-items: center;
-        }
+<style>
+:root {
+  --bg: #0d0d0d;
+  --fg: #ffffff;
+  --accent: #ffcc00;
+  --card: #1a1a1a;
+  --vedic-bg: #f2e5c4;
+  --vedic-fg: #3a2500;
+  --vedic-accent: #b8860b;
+}
 
-        /* Tab Content */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; }
-        .view { display: none; animation: fadeIn 0.3s; }
-        .view.active { display: block; }
+body {
+  margin:0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  transition: 0.4s;
+}
 
-        /* GRID LAYOUTS */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 12px; border: 1px solid #333; }
-        .label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
-        .val { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
+header {
+  text-align:center;
+  padding:20px;
+  font-size:2rem;
+  font-weight:600;
+  letter-spacing:2px;
+  color: var(--accent);
+}
 
-        /* WORLD CLOCK */
-        .city-row { 
-            display: flex; justify-content: space-between; padding: 15px; 
-            border-bottom: 1px solid #333; align-items: center;
-        }
-        .city-time { font-family: monospace; font-size: 1.2rem; color: var(--neon-blue); }
+.container {
+  width: 90%;
+  max-width:900px;
+  margin:auto;
+}
 
-        /* TOOLS */
-        .btn { 
-            padding: 10px 20px; border-radius: 50px; border: none; font-weight: bold; 
-            cursor: pointer; margin: 5px; 
-        }
-        .btn-blue { background: var(--neon-blue); color: #000; }
-        .btn-red { background: var(--danger); color: #fff; }
-        .stopwatch-big { font-size: 2.5rem; text-align: center; margin: 20px 0; font-family: monospace; }
+.card {
+  background: var(--card);
+  padding:20px;
+  margin:20px 0;
+  border-radius:12px;
+  box-shadow: 0 0 10px #000;
+}
 
-        /* NAV BAR */
-        .nav { 
-            display: flex; justify-content: space-around; background: #151515; 
-            padding: 10px; border-top: 1px solid #333;
-        }
-        .nav-item { 
-            background: none; border: none; color: #666; font-size: 0.7rem; 
-            display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
-        }
-        .nav-item.active { color: var(--neon-gold); }
-        .nav-icon { font-size: 1.2rem; }
+/* CLOCK */
+.big-clock {
+  font-size:3rem;
+  text-align:center;
+  margin:20px 0;
+  letter-spacing:3px;
+}
 
-        @keyframes fadeIn { from {opacity:0} to {opacity:1} }
-    </style>
+.date {
+  text-align:center;
+  margin-top:-10px;
+  opacity:0.8;
+}
+
+/* Buttons */
+.btn {
+  background: var(--accent);
+  color:#000;
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  margin:10px 5px;
+  font-weight:600;
+}
+
+.btn:hover { opacity:0.8; }
+
+/* Theme Toggle */
+#themeToggle {
+  float:right;
+  margin-top:-55px;
+}
+</style>
+
 </head>
 <body>
 
-<div class="app-shell">
-    <!-- HEADER -->
-    <div class="header">
-        <div class="main-time" id="clock">00:00:00</div>
-        <div style="color: #888" id="date">...</div>
-    </div>
-    
-    <div class="ai-strip" id="ai-box">
-        <span>🤖</span> <span id="ai-msg">Loading AI...</span>
-    </div>
+<header>SAMAY 2.0 — महाकाल का समय</header>
 
-    <!-- CONTENT -->
-    <div class="content-area">
-        
-        <!-- TAB 1: PANCHANG -->
-        <div id="view-panchang" class="view active">
-            <h3 style="color:var(--neon-gold); margin-bottom:15px">Vedic Status</h3>
-            <div class="grid-2">
-                <div class="card"><div class="label">Tithi</div><div class="val" id="p-tithi">--</div></div>
-                <div class="card"><div class="label">Nakshatra</div><div class="val" id="p-nak">--</div></div>
-                <div class="card"><div class="label">Rahukaal</div><div class="val" id="p-rahu" style="color:var(--danger)">--</div></div>
-                <div class="card"><div class="label">Brahma M.</div><div class="val">04:24 - 05:12</div></div>
-            </div>
-        </div>
+<button id="themeToggle" class="btn">Switch Theme</button>
 
-        <!-- TAB 2: WORLD -->
-        <div id="view-world" class="view">
-            <div id="world-list"></div>
-        </div>
+<div class="container">
 
-        <!-- TAB 3: TOOLS (Stopwatch/Alarm) -->
-        <div id="view-tools" class="view">
-            <!-- Alarm Section -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="label">SET ALARM</div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="time" id="alarm-in" style="background:#333; border:none; color:#fff; padding:10px; border-radius:5px;">
-                    <button class="btn btn-blue" onclick="setAlarm()">Set</button>
-                </div>
-                <div id="alarm-stat" style="margin-top:5px; font-size:0.8rem; color:var(--neon-gold)"></div>
-            </div>
+  <div class="card">
+    <div id="clock" class="big-clock">00:00:00</div>
+    <div id="date" class="date"></div>
+  </div>
 
-            <!-- Stopwatch -->
-            <div class="card">
-                <div class="label">STOPWATCH</div>
-                <div class="stopwatch-big" id="sw-disp">00:00:00</div>
-                <div style="text-align:center">
-                    <button class="btn btn-blue" onclick="swStart()">Start</button>
-                    <button class="btn btn-red" onclick="swStop()">Stop</button>
-                    <button class="btn" style="background:#444; color:#fff" onclick="swReset()">Rst</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div class="card">
+    <h2>⏱ Live Features (Part–1 Ready)</h2>
+    <ul>
+      <li>Real-Time Ultra Clock Engine</li>
+      <li>Dual Theme – Modern Neon + Vedic Gold</li>
+      <li>High-Precision Time Fetch</li>
+      <li>Layout for Panchang & AI Advisor (Coming in Part-2 & 3)</li>
+    </ul>
+  </div>
 
-    <!-- NAVIGATION -->
-    <div class="nav">
-        <button class="nav-item active" onclick="nav('panchang', this)"><span class="nav-icon">🕉️</span>Panchang</button>
-        <button class="nav-item" onclick="nav('world', this)"><span class="nav-icon">🌍</span>World</button>
-        <button class="nav-item" onclick="nav('tools', this)"><span class="nav-icon">⏱️</span>Tools</button>
-    </div>
+  <div class="card">
+    <h2>📌 Modules Coming Next (Part–2)</h2>
+    <ul>
+      <li>Full Panchang Engine (Tithi, Nakshatra, Yoga, Karan)</li>
+      <li>Sunrise / Sunset Calculation</li>
+      <li>Rahukaal / Yamaganda / Gulikaal</li>
+      <li>Hora System</li>
+      <li>Vedic Calendar + Rashis</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🤖 AI Time Advisor (Part–3)</h2>
+    <ul>
+      <li>Shubh-Ashubh Work Timing</li>
+      <li>Travel Direction</li>
+      <li>Productivity Predictor</li>
+      <li>Spiritual Time Recommender</li>
+      <li>Trading Best Time Signal (Based on Panchang)</li>
+    </ul>
+  </div>
+
 </div>
 
 <script>
-    // --- 1. CORE CLOCK & AI ---
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12:false});
-        document.getElementById('date').innerText = now.toDateString();
-        checkAlarm(now);
-        if(now.getSeconds()===0) updatePanchang(now);
-        updateWorld(now);
-    }
-    setInterval(updateClock, 1000);
+// CLOCK ENGINE
+function updateClock() {
+  let now = new Date();
+  let h = String(now.getHours()).padStart(2,'0');
+  let m = String(now.getMinutes()).padStart(2,'0');
+  let s = String(now.getSeconds()).padStart(2,'0');
 
-    // --- 2. WORLD CLOCK ---
-    const cities = [
-        {name:'New York', z:'America/New_York'},
-        {name:'London', z:'Europe/London'},
-        {name:'Dubai', z:'Asia/Dubai'},
-        {name:'Tokyo', z:'Asia/Tokyo'}
-    ];
-    function updateWorld(now) {
-        let html = '';
-        cities.forEach(c => {
-            const t = now.toLocaleTimeString('en-US', {timeZone:c.z, hour12:false});
-            html += `<div class="city-row"><span>${c.name}</span><span class="city-time">${t}</span></div>`;
-        });
-        document.getElementById('world-list').innerHTML = html;
-    }
+  document.getElementById("clock").innerHTML = `${h}:${m}:${s}`;
 
-    // --- 3. PANCHANG ENGINE (Simplified Logic) ---
-    function updatePanchang(now) {
-        // Uses Astronomy Engine if available, else fallback
-        try {
-            const sun = Astronomy.EclipticLongitude('Sun', now);
-            const moon = Astronomy.EclipticLongitude('Moon', now);
-            const ayanamsa = 24.22;
-            const moonSid = (moon - ayanamsa + 360) % 360;
-            const sunSid = (sun - ayanamsa + 360) % 360;
-            
-            // Tithi
-            const tithiIdx = Math.ceil(((moonSid - sunSid + 360) % 360) / 12);
-            document.getElementById('p-tithi').innerText = "Tithi " + tithiIdx;
+  let options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById("date").innerHTML = now.toLocaleDateString('en-IN', options);
+}
+setInterval(updateClock,1000);
+updateClock();
 
-            // Nakshatra
-            const nakIdx = Math.floor(moonSid / 13.333);
-            const naks = ["Ashwini","Bharani","Krittika","Rohini","Mrigashirsha","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva P.","Uttara P.","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva A.","Uttara A.","Shravana","Dhanishtha","Shatabhisha","Purva B.","Uttara B.","Revati"];
-            document.getElementById('p-nak').innerText = naks[nakIdx] || "Unknown";
+// THEME SWITCHER
+let vedic = false;
+document.getElementById("themeToggle").onclick = () => {
+  vedic = !vedic;
 
-            // AI Advice
-            const h = now.getHours();
-            const el = document.getElementById('ai-msg');
-            const box = document.getElementById('ai-box');
-            if(h >= 4 && h < 6) { el.innerText = "Brahma Muhurat: Meditate now."; box.style.borderColor = "#0f0"; }
-            else if(h >= 10 && h < 12) { el.innerText = "High Energy: Work hard."; box.style.borderColor = "#00f0ff"; }
-            else { el.innerText = "Samay Shubh Hai."; box.style.borderColor = "var(--neon-gold)"; }
-
-        } catch(e) { console.log("Init..."); }
-    }
-
-    // --- 4. ALARM ---
-    let alarmTime = null;
-    function setAlarm() {
-        alarmTime = document.getElementById('alarm-in').value;
-        document.getElementById('alarm-stat').innerText = "Alarm set for " + alarmTime;
-    }
-    function checkAlarm(now) {
-        if(alarmTime && now.toTimeString().slice(0,5) === alarmTime && now.getSeconds() === 0) {
-            alert("⏰ WAKE UP! SAMAY ALARM!");
-            alarmTime = null;
-            document.getElementById('alarm-stat').innerText = "";
-        }
-    }
-
-    // --- 5. STOPWATCH ---
-    let swInt, swSec=0;
-    function swStart() {
-        if(swInt) return;
-        swInt = setInterval(() => {
-            swSec++;
-            const d = new Date(swSec * 1000);
-            document.getElementById('sw-disp').innerText = d.toISOString().substr(11,8);
-        }, 1000);
-    }
-    function swStop() { clearInterval(swInt); swInt=null; }
-    function swReset() { swStop(); swSec=0; document.getElementById('sw-disp').innerText = "00:00:00"; }
-
-    // NAV
-    function nav(id, btn) {
-        document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-        document.getElementById('view-'+id).classList.add('active');
-        btn.classList.add('active');
-    }
-    
-    // Init
-    updatePanchang(new Date());
+  if(vedic){
+    document.body.style.background = "var(--vedic-bg)";
+    document.body.style.color = "var(--vedic-fg)";
+  } else {
+    document.body.style.background = "var(--bg)";
+    document.body.style.color = "var(--fg)";
+  }
+};
 </script>
+
 </body>
 </html>
+<!--  ----------  PANCHANG ENGINE START  ----------  -->
+
+<script>
+// -----------------------------
+//  ASTRONOMY CORE FUNCTIONS
+// -----------------------------
+function toJulian(date) {
+    return (date / 86400000) + 2440587.5;
+}
+function degToRad(d){ return d * Math.PI / 180; }
+function radToDeg(r){ return r * 180 / Math.PI; }
+
+// Solar longitude
+function getSunLongitude(jd) {
+    let n = jd - 2451545.0;
+    let L = (280.460 + 0.9856474 * n) % 360;
+    let g = (357.528 + 0.9856003 * n) % 360;
+    let lambda = L + 1.915 * Math.sin(degToRad(g)) + 0.020 * Math.sin(2 * degToRad(g));
+    return lambda % 360;
+}
+
+// Lunar longitude
+function getMoonLongitude(jd) {
+    let n = jd - 2451545.0;
+    let L = (218.316 + 13.176396 * n) % 360;
+    let M = (134.963 + 13.064993 * n) % 360;
+    let F = (93.272 + 13.229350 * n) % 360;
+
+    let lambda = L 
+        + 6.289 * Math.sin(degToRad(M))
+        + 1.274 * Math.sin(degToRad(2 * L - M))
+        + 0.658 * Math.sin(degToRad(2 * L))
+        + 0.214 * Math.sin(degToRad(2 * M))
+        - 0.186 * Math.sin(degToRad(134));
+
+    return lambda % 360;
+}
+
+// -----------------------------
+//       TITHI CALCULATION
+// -----------------------------
+function getTithi(jd) {
+    let sun = getSunLongitude(jd);
+    let moon = getMoonLongitude(jd);
+
+    let diff = (moon - sun + 360) % 360;
+    let tithi = Math.floor(diff / 12);
+
+    let names = [
+        "Pratipada", "Dvitiya", "Tritiya", "Chaturthi", "Panchami", "Shashthi",
+        "Saptami", "Ashtami", "Navami", "Dashami", "Ekadashi", "Dwadashi",
+        "Trayodashi", "Chaturdashi", "Purnima / Amavasya"
+    ];
+
+    return names[tithi];
+}
+
+// -----------------------------
+//    NAKSHATRA CALCULATION
+// -----------------------------
+function getNakshatra(jd) {
+    let moon = getMoonLongitude(jd);
+    let nak = Math.floor((moon % 360) / (360/27));
+
+    let names = [
+        "Ashwini","Bharani","Krittika","Rohini","Mrigashirsha","Ardra","Punarvasu",
+        "Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni","Hasta",
+        "Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva Ashadha",
+        "Uttara Ashadha","Shravana","Dhanishta","Shatabhisha","Purva Bhadrapada",
+        "Uttara Bhadrapada","Revati"
+    ];
+
+    return names[nak];
+}
+
+// -----------------------------
+//   YOGA CALCULATION
+// -----------------------------
+function getYoga(jd) {
+    let sun = getSunLongitude(jd);
+    let moon = getMoonLongitude(jd);
+
+    let total = (sun + moon) % 360;
+    let yoga = Math.floor(total / (360/27));
+
+    let names = [
+        "Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarma",
+        "Dhriti","Shoola","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana",
+        "Vajra","Siddhi","Vyatipata","Variyan","Parigha","Shiva","Siddha",
+        "Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"
+    ];
+
+    return names[yoga];
+}
+
+// -----------------------------
+//   KARANA CALCULATION
+// -----------------------------
+function getKarana(jd) {
+    let sun = getSunLongitude(jd);
+    let moon = getMoonLongitude(jd);
+
+    let diff = (moon - sun + 360) % 360;
+    let t = diff / 6; // 6-degree = 1 karana
+    let kar = Math.floor(t % 60);
+
+    let names = [
+        "Bava","Balava","Kaulava","Taitila","Garaja","Vanija","Vishti",
+        "Shakuni","Chatushpada","Naga","Kimstughna"
+    ];
+
+    return names[kar % 11];
+}
+
+// -----------------------------
+//   SUNRISE/SUNSET BASIC MODEL
+// -----------------------------
+function calcSunrise(lat, lon) {
+    return "06:12 AM"; // placeholder (Part-3 me full NOAA model add hoga)
+}
+
+// -----------------------------
+//     PANCHANG MASTER FUNCTION
+// -----------------------------
+function generatePanchang() {
+    let now = new Date();
+    let jd = toJulian(now);
+
+    return {
+        tithi: getTithi(jd),
+        nakshatra: getNakshatra(jd),
+        yoga: getYoga(jd),
+        karana: getKarana(jd),
+        sunrise: calcSunrise(),
+        weekday: now.toLocaleDateString("en-IN", { weekday:"long" })
+    };
+}
+
+// DISPLAY ON SCREEN
+function updatePanchangUI() {
+    let p = generatePanchang();
+
+    document.getElementById("tithi").innerHTML = p.tithi;
+    document.getElementById("nakshatra").innerHTML = p.nakshatra;
+    document.getElementById("yoga").innerHTML = p.yoga;
+    document.getElementById("karana").innerHTML = p.karana;
+    document.getElementById("sunrise").innerHTML = p.sunrise;
+    document.getElementById("weekday").innerHTML = p.weekday;
+}
+setInterval(updatePanchangUI, 2000);
+updatePanchangUI();
+
+</script>
+
+<!--  ----------  PANCHANG ENGINE END  ----------  -->
+
+<div class="card">
+  <h2>🕉 आज का पूर्ण पंचांग</h2>
+  <p><b>वार:</b> <span id="weekday"></span></p>
+  <p><b>तिथि:</b> <span id="tithi"></span></p>
+  <p><b>नक्षत्र:</b> <span id="nakshatra"></span></p>
+  <p><b>योग:</b> <span id="yoga"></span></p>
+  <p><b>करण:</b> <span id="karana"></span></p>
+  <p><b>सूर्योदय:</b> <span id="sunrise"></span></p>
+</div>
+<!--  ============================
+      SAMAY 2.0 — PART 3 FINAL 
+     Legendary Features Add-On
+     ============================ -->
+
+<script>
+/* ------------------------------
+   NOAA Accurate Sunrise/Sunset
+--------------------------------*/
+function sunCalc(date, lat, lng) {
+    let rad = Math.PI / 180;
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+
+    let N1 = Math.floor(275 * month / 9);
+    let N2 = Math.floor((month + 9) / 12);
+    let N3 = 1 + Math.floor((year - 4 * Math.floor(year/4) + 2) / 3);
+    let N = N1 - (N2 * N3) + day - 30;
+
+    let lngHour = lng / 15;
+
+    function calcSunrise() {
+        let t = N + ((6 - lngHour) / 24);
+        return sunTime(t, true);
+    }
+
+    function calcSunset() {
+        let t = N + ((18 - lngHour) / 24);
+        return sunTime(t, false);
+    }
+
+    function sunTime(t, isRise) {
+        let M = (0.9856 * t) - 3.289;
+        let L = M + (1.916 * Math.sin(rad*M)) + (0.020 * Math.sin(rad*2*M)) + 282.634;
+        L = (L + 360) % 360;
+
+        let RA = radToDeg(Math.atan(0.91764 * Math.tan(rad*L)));
+        RA = (RA + 360) % 360;
+
+        let Lquadrant  = Math.floor(L/90) * 90;
+        let RAquadrant = Math.floor(RA/90) * 90;
+        RA = RA + (Lquadrant - RAquadrant);
+        RA /= 15;
+
+        let sinDec = 0.39782 * Math.sin(rad*L);
+        let cosDec = Math.cos(Math.asin(sinDec));
+
+        let cosH = (Math.cos(rad*90.833) - (sinDec * Math.sin(rad*lat))) / (cosDec * Math.cos(rad*lat));
+
+        if (cosH > 1) return "Never rises";
+        if (cosH < -1) return "Never sets";
+
+        let H = isRise ? 360 - radToDeg(Math.acos(cosH)) : radToDeg(Math.acos(cosH));
+        H /= 15;
+
+        let T = H + RA - (0.06571 * t) - 6.622;
+        let UT = (T - lngHour + 24) % 24;
+
+        let hr = Math.floor(UT);
+        let mn = Math.floor((UT - hr) * 60);
+
+        return `${String(hr).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;
+    }
+
+    return {
+        sunrise: calcSunrise(),
+        sunset: calcSunset()
+    };
+}
+
+/* ----------------------------------------
+   Rahukaal / Yamaganda / Gulikaal
+---------------------------------------- */
+function getKala(now) {
+    let weekday = now.getDay();
+    let start = 6; // 6 AM
+    let todaySunrise = 6; 
+    let dayLength = 12; // simplified (exact auto later)
+
+    let segment = dayLength / 8;
+
+    const rahuOrder = [7,1,6,4,5,3,2];
+    const yamaOrder = [5,3,2,1,7,6,4];
+    const guliOrder = [6,4,3,2,1,7,5];
+
+    function period(num) {
+        let from = todaySunrise + segment*(num-1);
+        let to = from + segment;
+        return `${from.toFixed(2)} - ${to.toFixed(2)}`
+    }
+
+    return {
+        rahukaal: period(rahuOrder[weekday]),
+        yama: period(yamaOrder[weekday]),
+        gulika: period(guliOrder[weekday])
+    };
+}
+
+/* ----------------------------------------
+   AI TIME ADVISOR ENGINE
+---------------------------------------- */
+function aiAdvisor(p) {
+    let advice = "";
+
+    if (p.tithi.includes("Ekadashi"))
+        advice += "आज उपवास और आध्यात्मिक कार्य श्रेष्ठ रहेंगे।⚡<br>";
+
+    if (p.nakshatra === "Rohini" || p.nakshatra === "Pushya")
+        advice += "आज शुभ कार्य, व्यापार, खरीदारी का उत्तम योग है.✨<br>";
+
+    if (p.yoga === "Siddhi")
+        advice += "आज का दिन सफलता दिलाने वाला है. 🚀<br>";
+
+    if (p.yoga === "Vyatipata")
+        advice += "सावधानी रखें — विवाद/तनाव से दूर रहें. ⚠️<br>";
+
+    // Trading guidance
+    if (p.weekday === "Monday")
+        advice += "सोमवार को market थोड़ा slow रहता है — scalping better. 📉📈<br>";
+
+    if (p.weekday === "Thursday")
+        advice += "गुरुवार को bank-nifty strong moves दे सकता है.🔥<br>";
+
+    return advice || "आज का दिन सामान्य लेकिन शांतिपूर्ण रहेगा.";
+}
+
+/* ----------------------------------------
+   STOPWATCH
+---------------------------------------- */
+let swTime = 0, swInterval;
+function startSW() {
+    swInterval = setInterval(()=> {
+        swTime++;
+        document.getElementById("sw").innerHTML = swTime+" sec";
+    },1000);
+}
+function stopSW(){ clearInterval(swInterval); }
+function resetSW(){ swTime=0; document.getElementById("sw").innerHTML = "0 sec"; }
+
+/* ----------------------------------------
+   TIMER
+---------------------------------------- */
+let timerInt;
+function startTimer() {
+    let t = parseInt(document.getElementById("timerInput").value);
+    timerInt = setInterval(()=> {
+        if(t<=0) { clearInterval(timerInt); alert("Timer Over!"); }
+        document.getElementById("timer").innerHTML = t-- + " sec";
+    },1000);
+}
+
+/* ----------------------------------------
+   ALARM
+---------------------------------------- */
+function setAlarm() {
+    let a = document.getElementById("alarmTime").value;
+
+    setInterval(()=> {
+        let now = new Date();
+        let h = String(now.getHours()).padStart(2,'0');
+        let m = String(now.getMinutes()).padStart(2,'0');
+
+        if(`${h}:${m}` === a){
+            alert("⏰ ALARM!");
+        }
+    },1000);
+}
+
+/* ----------------------------------------
+   World Clock (Top cities)
+---------------------------------------- */
+function worldClock() {
+    let zones = {
+        "New York": -10.5, "London": -5.5, "Dubai": -1.5,
+        "Tokyo": 3.5, "Sydney": 5.5, "Moscow": -3.5,
+        "Singapore": 2.5, "Bangkok": 1.5, "Kathmandu": 0.25
+    };
+
+    let base = new Date().getTime();
+    let html = "";
+
+    Object.keys(zones).forEach(z=>{
+        let dt = new Date(base + zones[z]*3600*1000);
+        html += `<b>${z}:</b> ${dt.toUTCString().slice(17,25)}<br>`;
+    });
+
+    document.getElementById("wclock").innerHTML = html;
+}
+setInterval(worldClock, 1000);
+
+/* ----------------------------------------
+   Festival Engine (Basic)
+---------------------------------------- */
+function getFestival(d, m) {
+    let list = {
+        "14-1":"Makar Sankranti",
+        "26-1":"Republic Day",
+        "8-3":"Mahashivratri",
+        "25-3":"Holi",
+        "21-4":"Ram Navami",
+        "11-8":"Raksha Bandhan",
+        "15-8":"Independence Day",
+        "2-11":"Diwali"
+    };
+
+    return list[`${d}-${m}`] || "No major festival today";
+}
+
+/* ----------------------------------------
+   Bind Everything On Screen
+---------------------------------------- */
+function updateSAMAY() {
+    let now = new Date();
+    let jd = toJulian(now);
+    let base = generatePanchang();
+
+    let sun = sunCalc(now, 20.3, 85.8); // Odisha approx (change later)
+    let kala = getKala(now);
+
+    document.getElementById("sunrise2").innerHTML = sun.sunrise;
+    document.getElementById("sunset2").innerHTML = sun.sunset;
+
+    document.getElementById("rahukaal").innerHTML = kala.rahukaal;
+    document.getElementById("yama").innerHTML = kala.yama;
+    document.getElementById("gulika").innerHTML = kala.gulika;
+
+    document.getElementById("festival").innerHTML =
+        getFestival(now.getDate(), now.getMonth()+1);
+
+    document.getElementById("advice").innerHTML =
+        aiAdvisor(base);
+}
+setInterval(updateSAMAY, 2000);
+updateSAMAY();
+
+</script>
+
+<!--  ======  FINAL UI BLOCKS  ====== -->
+
+<div class="card">
+  <h2>📌 Sunrise / Sunset</h2>
+  Sunrise: <span id="sunrise2"></span><br>
+  Sunset: <span id="sunset2"></span>
+</div>
+
+<div class="card">
+  <h2>🕯 Rahukaal / Yamaganda / Gulikaal</h2>
+  Rahukaal: <span id="rahukaal"></span><br>
+  Yamaganda: <span id="yama"></span><br>
+  Gulikaal: <span id="gulika"></span>
+</div>
+
+<div class="card">
+  <h2>📅 Festival Today</h2>
+  <span id="festival"></span>
+</div>
+
+<div class="card">
+  <h2>🤖 AI Time Advisor</h2>
+  <div id="advice"></div>
+</div>
+
+<div class="card">
+  <h2>🌍 World Clock</h2>
+  <div id="wclock"></div>
+</div>
+
+<div class="card">
+  <h2>⏱ Stopwatch</h2>
+  <div id="sw">0 sec</div>
+  <button onclick="startSW()" class="btn">Start</button>
+  <button onclick="stopSW()" class="btn">Stop</button>
+  <button onclick="resetSW()" class="btn">Reset</button>
+</div>
+
+<div class="card">
+  <h2>⏲ Timer</h2>
+  <input id="timerInput" type="number" placeholder="Seconds">
+  <button onclick="startTimer()" class="btn">Start</button>
+  <div id="timer"></div>
+</div>
+
+<div class="card">
+  <h2>⏰ Alarm</h2>
+  <input id="alarmTime" type="time">
+  <button onclick="setAlarm()" class="btn">Set</button>
+</div>
