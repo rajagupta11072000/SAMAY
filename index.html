@@ -3,392 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAMAY | Ultimate</title>
-    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #050505; --panel: #121212; --border: #222;
-            --primary: #00e5ff; --gold: #ffb700; --danger: #ff2a2a;
-            --text: #fff; --dim: #888;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
-
-        /* SIDEBAR */
-        .sidebar { width: 80px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 20px; z-index: 10; }
-        .nav-btn { width: 50px; height: 50px; border-radius: 12px; border: none; background: transparent; color: var(--dim); cursor: pointer; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 0.65rem; transition: 0.2s; }
-        .nav-btn span { font-size: 24px; }
-        .nav-btn:hover { background: #1f1f1f; color: #fff; }
-        .nav-btn.active { background: rgba(0, 229, 255, 0.15); color: var(--primary); }
-
-        /* MAIN AREA */
-        .main { flex: 1; position: relative; overflow: hidden; }
-        .view { position: absolute; inset: 0; padding: 20px; overflow-y: auto; opacity: 0; transform: translateY(20px); pointer-events: none; transition: 0.3s; display: flex; flex-direction: column; }
-        .view.active { opacity: 1; transform: translateY(0); pointer-events: all; }
-
-        h1 { font-size: 1.8rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
-        h1 b { color: var(--primary); }
-        .subtitle { font-size: 0.9rem; color: var(--dim); margin-top: -15px; margin-bottom: 20px; margin-left: 5px; }
-
-        /* 1. SUPER CLOCK */
-        .clock-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; }
-        .analog-clock { width: 320px; height: 320px; position: relative; border-radius: 50%; background: #111; border: 4px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        
-        /* VISIBLE HANDS (SUI) */
-        .hand { position: absolute; left: 50%; bottom: 50%; transform-origin: bottom center; border-radius: 4px; z-index: 2; }
-        .hand-h { width: 8px; height: 80px; background: #fff; margin-left: -4px; }
-        .hand-m { width: 4px; height: 110px; background: var(--primary); margin-left: -2px; }
-        .hand-s { width: 2px; height: 130px; background: var(--danger); margin-left: -1px; z-index: 3; transition: transform 0.1s cubic-bezier(0.4, 2.0, 0.3, 1); }
-        .center-dot { width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 4; border: 2px solid var(--danger); }
-        .markers { position: absolute; inset: 0; }
-        .mark { position: absolute; width: 2px; height: 10px; background: #444; left: 50%; top: 2px; transform-origin: 50% 158px; margin-left: -1px; }
-        .mark.big { width: 4px; height: 15px; background: #fff; }
-
-        .digital-display { text-align: center; }
-        .time-lg { font-size: 4.5rem; font-weight: 800; line-height: 1; letter-spacing: -2px; }
-        .date-sm { color: var(--primary); font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 10px; }
-
-        /* 2. PANCHANG GRID */
-        .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-        .p-card { background: #181818; padding: 15px; border-radius: 12px; border: 1px solid #333; position: relative; overflow: hidden; }
-        .p-card::before { content:''; position: absolute; left:0; top:0; bottom:0; width: 4px; background: var(--gold); }
-        .p-lbl { font-size: 0.75rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .p-val { font-size: 1.2rem; font-weight: bold; color: #fff; }
-        .p-sub { font-size: 0.85rem; color: var(--primary); margin-top: 4px; }
-        .rahu-card::before { background: var(--danger); }
-        .rahu-val { color: var(--danger); }
-
-        /* 3. HOLIDAY LIST */
-        .holiday-list { display: flex; flex-direction: column; gap: 10px; }
-        .h-item { display: flex; gap: 15px; background: #181818; padding: 15px; border-radius: 10px; align-items: center; border-left: 4px solid transparent; }
-        .h-item.upcoming { border-left-color: var(--primary); background: #1a1f22; }
-        .h-date { display: flex; flex-direction: column; align-items: center; background: #222; padding: 8px 12px; border-radius: 8px; min-width: 60px; }
-        .h-d { font-size: 1.2rem; font-weight: bold; }
-        .h-m { font-size: 0.7rem; color: var(--dim); text-transform: uppercase; }
-        .h-name { font-weight: 600; font-size: 1.1rem; }
-        .h-day { color: var(--dim); font-size: 0.9rem; }
-
-        /* 4. SUPER TIMER */
-        .timer-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-        .progress-ring { width: 300px; height: 300px; transform: rotate(-90deg); }
-        .ring-circle { fill: transparent; stroke: #222; stroke-width: 10; }
-        .ring-fill { fill: transparent; stroke: var(--primary); stroke-width: 10; stroke-dasharray: 880; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; stroke-linecap: round; }
-        .timer-overlay { position: absolute; display: flex; flex-direction: column; align-items: center; }
-        .timer-disp { font-size: 4rem; font-weight: 700; font-family: monospace; }
-        .presets { display: flex; gap: 10px; margin-top: 30px; }
-        .pill { padding: 8px 20px; background: #222; border-radius: 20px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
-        .pill:hover { border-color: var(--primary); color: var(--primary); }
-        .controls { display: flex; gap: 20px; margin-top: 20px; }
-        .c-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .b-play { background: var(--primary); color: #000; }
-        .b-stop { background: var(--danger); color: #fff; }
-
-        /* 5. TOOLS & WORLD */
-        .search { width: 100%; padding: 12px; background: #181818; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 15px; }
-        .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
-        .city-card { display: flex; justify-content: space-between; padding: 15px; background: #181818; border-radius: 8px; align-items: center; }
-        
-        @media (max-width: 700px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: 60px; flex-direction: row; justify-content: space-around; padding: 0; border-right: none; border-top: 1px solid var(--border); order: 2; }
-            .nav-btn { height: 100%; width: auto; margin: 0; }
-            .main { order: 1; }
-        }
-    </style>
+    <title>SAMAY - Professional Tool</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- NAV -->
-<nav class="sidebar">
-    <button class="nav-btn active" onclick="nav('clock', this)"><span class="material-icons-round">watch_later</span>Clock</button>
-    <button class="nav-btn" onclick="nav('panchang', this)"><span class="material-icons-round">self_improvement</span>Panchang</button>
-    <button class="nav-btn" onclick="nav('holiday', this)"><span class="material-icons-round">event</span>Holidays</button>
-    <button class="nav-btn" onclick="nav('timer', this)"><span class="material-icons-round">hourglass_top</span>Timer</button>
-    <button class="nav-btn" onclick="nav('world', this)"><span class="material-icons-round">public</span>World</button>
-</nav>
-
-<!-- MAIN -->
-<main class="main">
-    
-    <!-- 1. CLOCK TAB -->
-    <div id="view-clock" class="view active">
-        <div class="clock-stage">
-            <div class="analog-clock">
-                <div class="markers" id="dial"></div>
-                <div class="center-dot"></div>
-                <div class="hand hand-h" id="h-hand"></div>
-                <div class="hand hand-m" id="m-hand"></div>
-                <div class="hand hand-s" id="s-hand"></div>
-            </div>
-            <div class="digital-display">
-                <div class="time-lg" id="digi-time">00:00:00</div>
-                <div class="date-sm" id="digi-date">--</div>
-            </div>
+    <nav class="navbar">
+        <div class="logo">SAMAY <span>PRO</span></div>
+        <div class="menu">
+            <a href="#clocks">Clocks</a>
+            <a href="#world">World Time</a>
+            <a href="#tools">Tools</a>
+            <a href="#panchang">Hindu Panchang</a>
         </div>
-    </div>
+    </nav>
 
-    <!-- 2. PANCHANG TAB -->
-    <div id="view-panchang" class="view">
-        <h1>Vedic <b>Panchang</b></h1>
-        <div class="subtitle">Real-time calculations based on your location</div>
-        <div class="p-grid">
-            <div class="p-card">
-                <div class="p-lbl">Tithi (Lunar Day)</div>
-                <div class="p-val" id="p-tithi">--</div>
-                <div class="p-sub" id="p-paksha">--</div>
-            </div>
-            <div class="p-card">
-                <div class="p-lbl">Nakshatra (Star)</div>
-                <div class="p-val" id="p-nak">--</div>
-                <div class="p-sub" id="p-moon">Moon Sign</div>
-            </div>
-            <div class="p-card">
-                <div class="p-lbl">Yoga</div>
-                <div class="p-val" id="p-yoga">--</div>
-            </div>
-            <div class="p-card">
-                <div class="p-lbl">Karan</div>
-                <div class="p-val" id="p-karan">--</div>
-            </div>
-            <div class="p-card rahu-card">
-                <div class="p-lbl">Rahukaal (Inauspicious)</div>
-                <div class="p-val rahu-val" id="p-rahu">--</div>
-            </div>
-            <div class="p-card">
-                <div class="p-lbl">Sun Data</div>
-                <div class="p-val" style="font-size:1rem">Rise: <span id="p-rise">--</span></div>
-                <div class="p-val" style="font-size:1rem">Set: <span id="p-set">--</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. HOLIDAYS TAB -->
-    <div id="view-holiday" class="view">
-        <h1>2026 <b>Holidays</b></h1>
-        <div class="holiday-list" id="holiday-list"></div>
-    </div>
-
-    <!-- 4. TIMER TAB -->
-    <div id="view-timer" class="view">
-        <div class="timer-wrap">
-            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
-                <svg class="progress-ring">
-                    <circle class="ring-circle" r="140" cx="150" cy="150"></circle>
-                    <circle class="ring-fill" id="t-ring" r="140" cx="150" cy="150"></circle>
-                </svg>
-                <div class="timer-overlay">
-                    <div class="timer-disp" id="t-disp">00:00</div>
-                    <div style="color:var(--dim)" id="t-label">READY</div>
+    <div class="container">
+        <!-- Section 1: Clocks -->
+        <section id="clocks" class="main-card">
+            <div class="clock-box">
+                <div class="analog-clock" id="analog">
+                    <div class="hand hour" id="hr"></div>
+                    <div class="hand min" id="mn"></div>
+                    <div class="hand sec" id="sc"></div>
+                    <div class="nums">
+                        <b style="--i:1">12</b><b style="--i:2">3</b><b style="--i:3">6</b><b style="--i:4">9</b>
+                    </div>
+                </div>
+                <div class="digital-info">
+                    <h1 id="txt-time">00:00:00</h1>
+                    <p id="txt-date">Loading Date...</p>
                 </div>
             </div>
-            <div class="presets">
-                <div class="pill" onclick="setTimer(5, 'Tea Break')">5m Tea</div>
-                <div class="pill" onclick="setTimer(25, 'Pomodoro')">25m Focus</div>
-                <div class="pill" onclick="setTimer(45, 'Work')">45m Work</div>
+        </section>
+
+        <!-- Section 2: World Time (Auto-populated) -->
+        <section id="world" class="main-card">
+            <h2>🌍 World Cities Time (50+)</h2>
+            <div class="world-grid" id="world-grid"></div>
+        </section>
+
+        <!-- Section 3: Tools -->
+        <section id="tools" class="tool-grid">
+            <div class="tool-card">
+                <h3>⏱️ Stopwatch</h3>
+                <p id="sw-display">00:00:00</p>
+                <button onclick="startSW()">Start</button>
+                <button onclick="stopSW()">Stop</button>
+                <button onclick="resetSW()">Reset</button>
             </div>
-            <div class="controls">
-                <button class="c-btn b-play" onclick="toggleTimer()"><span class="material-icons-round" id="t-icon">play_arrow</span></button>
-                <button class="c-btn b-stop" onclick="resetTimer()"><span class="material-icons-round">stop</span></button>
+            <div class="tool-card">
+                <h3>⏲️ Timer</h3>
+                <input type="number" id="timer-val" placeholder="Mins">
+                <button onclick="startTimer()">Start</button>
+                <p id="timer-display">00:00</p>
             </div>
-        </div>
+        </section>
+
+        <!-- Section 4: Hindu Panchang -->
+        <section id="panchang" class="main-card">
+            <h2>🕉️ Hindu Panchang & Muhurta</h2>
+            <div class="panchang-box">
+                <div class="p-item"><strong>Current Tithi:</strong> <span id="tithi">Shukla Paksha</span></div>
+                <div class="p-item"><strong>Nakshatra:</strong> <span id="nakshatra">Calculating...</span></div>
+                <div class="p-item"><strong>Abhijit Muhurta:</strong> <span>11:45 AM - 12:30 PM</span></div>
+                <div class="p-item"><strong>Upcoming Holiday:</strong> <span id="holiday">Holi</span></div>
+            </div>
+        </section>
     </div>
 
-    <!-- 5. WORLD CLOCK TAB -->
-    <div id="view-world" class="view">
-        <h1>World <b>Clock</b></h1>
-        <input type="text" class="search" placeholder="Search City..." onkeyup="renderWorld(this.value)">
-        <div class="city-grid" id="world-list"></div>
-    </div>
-
-</main>
-
-<script>
-    // --- CONFIG & DATA ---
-    const holidays2026 = [
-        {d:"26", m:"Jan", n:"Republic Day", w:"Monday"},
-        {d:"04", m:"Mar", n:"Holi", w:"Wednesday"},
-        {d:"21", m:"Mar", n:"Id-ul-Fitr (Tentative)", w:"Saturday"},
-        {d:"26", m:"Mar", n:"Ram Navami", w:"Thursday"},
-        {d:"03", m:"Apr", n:"Good Friday", w:"Friday"},
-        {d:"14", m:"Apr", n:"Ambedkar Jayanti", w:"Tuesday"},
-        {d:"15", m:"Aug", n:"Independence Day", w:"Saturday"},
-        {d:"04", m:"Sep", n:"Janmashtami", w:"Friday"},
-        {d:"02", m:"Oct", n:"Gandhi Jayanti", w:"Friday"},
-        {d:"20", m:"Oct", n:"Dussehra", w:"Tuesday"},
-        {d:"08", m:"Nov", n:"Diwali", w:"Sunday"},
-        {d:"25", m:"Dec", n:"Christmas", w:"Friday"}
-    ];
-
-    const cities = [
-        {n:"New York", z:"America/New_York"}, {n:"London", z:"Europe/London"}, {n:"Dubai", z:"Asia/Dubai"}, 
-        {n:"Tokyo", z:"Asia/Tokyo"}, {n:"Singapore", z:"Asia/Singapore"}, {n:"Sydney", z:"Australia/Sydney"}, 
-        {n:"Paris", z:"Europe/Paris"}, {n:"Moscow", z:"Europe/Moscow"}, {n:"Los Angeles", z:"America/Los_Angeles"}
-    ];
-
-    // --- 1. CLOCK ENGINE ---
-    function initDial() {
-        const d = document.getElementById('dial');
-        for(let i=0; i<60; i++) {
-            const m = document.createElement('div');
-            m.className = i%5===0 ? 'mark big' : 'mark';
-            m.style.transform = `rotate(${i*6}deg)`;
-            d.appendChild(m);
-        }
-    }
-    
-    function tick() {
-        const now = new Date();
-        // Analog
-        const s = now.getSeconds();
-        const m = now.getMinutes();
-        const h = now.getHours();
-        document.getElementById('s-hand').style.transform = `rotate(${s*6}deg)`;
-        document.getElementById('m-hand').style.transform = `rotate(${m*6 + s*0.1}deg)`;
-        document.getElementById('h-hand').style.transform = `rotate(${h*30 + m*0.5}deg)`;
-        // Digital
-        document.getElementById('digi-time').innerText = now.toLocaleTimeString('en-US', {hour12:false});
-        document.getElementById('digi-date').innerText = now.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric', year:'numeric'});
-    }
-
-    // --- 2. PANCHANG ENGINE ---
-    function updatePanchang() {
-        const now = new Date();
-        try {
-            const sun = Astronomy.EclipticLongitude('Sun', now);
-            const moon = Astronomy.EclipticLongitude('Moon', now);
-            const ayanamsa = 24.22; 
-            const sSun = (sun - ayanamsa + 360) % 360;
-            const sMoon = (moon - ayanamsa + 360) % 360;
-
-            // Tithi
-            const tIdx = Math.ceil(((sMoon - sSun + 360)%360)/12);
-            document.getElementById('p-tithi').innerText = "Tithi " + tIdx;
-            document.getElementById('p-paksha').innerText = tIdx<=15 ? "Shukla Paksha" : "Krishna Paksha";
-
-            // Nakshatra
-            const nIdx = Math.floor(sMoon / 13.333);
-            const naks = ["Ashwini","Bharani","Krittika","Rohini","Mrigashirsha","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva P.","Uttara P.","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva A.","Uttara A.","Shravana","Dhanishtha","Shatabhisha","Purva B.","Uttara B.","Revati"];
-            document.getElementById('p-nak').innerText = naks[nIdx] || "--";
-            
-            // Yoga
-            const yIdx = Math.floor(((sSun + sMoon)%360)/13.333);
-            document.getElementById('p-yoga').innerText = "Yoga " + (yIdx+1);
-            
-            // Karan
-            document.getElementById('p-karan').innerText = "Karan " + Math.ceil(((sMoon - sSun + 360)%360)/6);
-
-            // Rahukaal (Simple Day Logic)
-            const rahuTimes = ["16:30-18:00", "07:30-09:00", "15:00-16:30", "12:00-13:30", "13:30-15:00", "10:30-12:00", "09:00-10:30"];
-            document.getElementById('p-rahu').innerText = rahuTimes[now.getDay()];
-
-            // Sun
-            navigator.geolocation.getCurrentPosition(p => {
-                const obs = new Astronomy.Observer(p.coords.latitude, p.coords.longitude, 0);
-                const rise = Astronomy.SearchRiseSet('Sun', obs, +1, now, 300);
-                const set = Astronomy.SearchRiseSet('Sun', obs, -1, now, 300);
-                if(rise) document.getElementById('p-rise').innerText = rise.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                if(set) document.getElementById('p-set').innerText = set.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            });
-
-        } catch(e) { console.log(e); }
-    }
-
-    // --- 3. RENDER HOLIDAYS ---
-    function renderHolidays() {
-        const list = document.getElementById('holiday-list');
-        const mNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        const today = new Date();
-        
-        holidays2026.forEach(h => {
-            // Simple checks for 'upcoming' highlighting
-            let isUpcoming = false; 
-            // (Logic simplified for demo - assumes 2026)
-            
-            list.innerHTML += `
-                <div class="h-item ${isUpcoming ? 'upcoming' : ''}">
-                    <div class="h-date">
-                        <span class="h-d">${h.d}</span>
-                        <span class="h-m">${h.m}</span>
-                    </div>
-                    <div>
-                        <div class="h-name">${h.n}</div>
-                        <div class="h-day">${h.w}</div>
-                    </div>
-                </div>`;
-        });
-    }
-
-    // --- 4. SUPER TIMER ---
-    let tTime = 0, tTotal = 0, tInt = null, tState = false;
-    const circle = document.getElementById('t-ring');
-    const circumference = 2 * Math.PI * 140;
-    
-    function setTimer(mins, lbl) {
-        resetTimer();
-        tTotal = mins * 60;
-        tTime = tTotal;
-        document.getElementById('t-label').innerText = lbl || "CUSTOM";
-        updateRing();
-    }
-    
-    function toggleTimer() {
-        if(tState) {
-            clearInterval(tInt); tState = false;
-            document.getElementById('t-icon').innerText = "play_arrow";
-        } else {
-            if(tTime <= 0) return;
-            tState = true;
-            document.getElementById('t-icon').innerText = "pause";
-            tInt = setInterval(() => {
-                if(tTime > 0) { tTime--; updateRing(); }
-                else { resetTimer(); alert("TIME UP!"); }
-            }, 1000);
-        }
-    }
-    
-    function resetTimer() {
-        clearInterval(tInt); tState = false;
-        tTime = 0; tTotal = 0;
-        document.getElementById('t-icon').innerText = "play_arrow";
-        updateRing();
-    }
-
-    function updateRing() {
-        const min = Math.floor(tTime/60); 
-        const sec = tTime%60;
-        document.getElementById('t-disp').innerText = `${min<10?'0'+min:min}:${sec<10?'0'+sec:sec}`;
-        
-        // SVG Offset
-        const offset = tTotal === 0 ? 880 : circumference - (tTime / tTotal) * circumference;
-        circle.style.strokeDashoffset = offset;
-    }
-
-    // --- 5. WORLD CLOCK ---
-    function renderWorld(q) {
-        const div = document.getElementById('world-list');
-        div.innerHTML = '';
-        const now = new Date();
-        cities.filter(c => c.n.toLowerCase().includes(q.toLowerCase())).forEach(c => {
-            const t = now.toLocaleTimeString('en-US', {timeZone:c.z, hour:'2-digit', minute:'2-digit'});
-            div.innerHTML += `<div class="city-card"><span>${c.n}</span><span style="color:var(--primary); font-weight:bold">${t}</span></div>`;
-        });
-    }
-
-    // --- NAV ---
-    function nav(id, btn) {
-        document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-        document.getElementById('view-'+id).classList.add('active');
-        document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-        btn.classList.add('active');
-    }
-
-    // INIT
-    initDial();
-    setInterval(tick, 1000); tick();
-    updatePanchang();
-    renderHolidays();
-    renderWorld('');
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
