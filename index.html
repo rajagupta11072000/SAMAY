@@ -3,74 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAMAY - Professional Tool</title>
+    <title>SAMAY 2.0 — Ultimate Hindu Time System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">SAMAY <span>PRO</span></div>
-        <div class="menu">
-            <a href="#clocks">Clocks</a>
-            <a href="#world">World Time</a>
-            <a href="#tools">Tools</a>
-            <a href="#panchang">Hindu Panchang</a>
+
+    <header class="top-header">
+        <h1>SAMAY 2.0</h1>
+        <p>Ultimate Hindu Time Intelligence System</p>
+    </header>
+
+    <!-- LIVE CLOCK -->
+    <section class="card">
+        <h2>🕒 Current Time</h2>
+        <div id="liveClock" class="big-clock"></div>
+    </section>
+
+    <!-- PANCHANG -->
+    <section class="card">
+        <h2>📿 Vedic Panchang</h2>
+        <div id="panchangBox">
+            <p><strong>Tithi:</strong> <span id="tithi"></span></p>
+            <p><strong>Nakshatra:</strong> <span id="nakshatra"></span></p>
+            <p><strong>Sunrise:</strong> <span id="sunrise"></span></p>
+            <p><strong>Sunset:</strong> <span id="sunset"></span></p>
+            <p><strong>Rahukaal:</strong> <span id="rahukal"></span></p>
+            <p><strong>Yamagand:</strong> <span id="yamagand"></span></p>
         </div>
-    </nav>
+    </section>
 
-    <div class="container">
-        <!-- Section 1: Clocks -->
-        <section id="clocks" class="main-card">
-            <div class="clock-box">
-                <div class="analog-clock" id="analog">
-                    <div class="hand hour" id="hr"></div>
-                    <div class="hand min" id="mn"></div>
-                    <div class="hand sec" id="sc"></div>
-                    <div class="nums">
-                        <b style="--i:1">12</b><b style="--i:2">3</b><b style="--i:3">6</b><b style="--i:4">9</b>
-                    </div>
-                </div>
-                <div class="digital-info">
-                    <h1 id="txt-time">00:00:00</h1>
-                    <p id="txt-date">Loading Date...</p>
-                </div>
-            </div>
-        </section>
+    <!-- AI ADVISOR -->
+    <section class="card">
+        <h2>🤖 AI Time Advisor</h2>
+        <p><strong>Auspicious Score:</strong> <span id="score"></span>/100</p>
+        <p id="reading"></p>
 
-        <!-- Section 2: World Time (Auto-populated) -->
-        <section id="world" class="main-card">
-            <h2>🌍 World Cities Time (50+)</h2>
-            <div class="world-grid" id="world-grid"></div>
-        </section>
+        <h3>Trading Lucky Time</h3>
+        <p id="trading"></p>
 
-        <!-- Section 3: Tools -->
-        <section id="tools" class="tool-grid">
-            <div class="tool-card">
-                <h3>⏱️ Stopwatch</h3>
-                <p id="sw-display">00:00:00</p>
-                <button onclick="startSW()">Start</button>
-                <button onclick="stopSW()">Stop</button>
-                <button onclick="resetSW()">Reset</button>
-            </div>
-            <div class="tool-card">
-                <h3>⏲️ Timer</h3>
-                <input type="number" id="timer-val" placeholder="Mins">
-                <button onclick="startTimer()">Start</button>
-                <p id="timer-display">00:00</p>
-            </div>
-        </section>
+        <h3>Meditation Time</h3>
+        <p id="meditation"></p>
+    </section>
 
-        <!-- Section 4: Hindu Panchang -->
-        <section id="panchang" class="main-card">
-            <h2>🕉️ Hindu Panchang & Muhurta</h2>
-            <div class="panchang-box">
-                <div class="p-item"><strong>Current Tithi:</strong> <span id="tithi">Shukla Paksha</span></div>
-                <div class="p-item"><strong>Nakshatra:</strong> <span id="nakshatra">Calculating...</span></div>
-                <div class="p-item"><strong>Abhijit Muhurta:</strong> <span>11:45 AM - 12:30 PM</span></div>
-                <div class="p-item"><strong>Upcoming Holiday:</strong> <span id="holiday">Holi</span></div>
-            </div>
-        </section>
-    </div>
+    <!-- STOPWATCH -->
+    <section class="card">
+        <h2>⏱ Stopwatch</h2>
+        <div id="stopwatch" class="tool-display">00:00:00</div>
+        <button onclick="startStopwatch()">Start</button>
+        <button onclick="stopStopwatch()">Stop</button>
+        <button onclick="resetStopwatch()">Reset</button>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- TIMER -->
+    <section class="card">
+        <h2>⏲ Timer</h2>
+        <input type="number" id="timerInput" placeholder="Seconds">
+        <button onclick="startTimer()">Start</button>
+        <button onclick="stopTimer()">Stop</button>
+        <div id="timer" class="tool-display">00</div>
+    </section>
+
+    <!-- WORLD CLOCK -->
+    <section class="card">
+        <h2>🌍 World Clock</h2>
+        <select id="worldCity">
+            <option value="Asia/Kolkata">Kolkata (India)</option>
+            <option value="America/New_York">New York</option>
+            <option value="Europe/London">London</option>
+            <option value="Asia/Dubai">Dubai</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+        </select>
+        <div id="worldClock" class="tool-display"></div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        // -----------------------
+        // LIVE DIGITAL CLOCK
+        // -----------------------
+        function updateClock() {
+            document.getElementById("liveClock").innerText =
+                new Date().toLocaleTimeString("en-IN");
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // -----------------------
+        // PANCHANG + ADVISOR LOAD
+        // -----------------------
+        async function loadPanchang() {
+            const p = await SAMAY_CORE.getDailyPanchang(new Date());
+            const ai = await SAMAY_AI.getAIAdvisor(p);
+
+            document.getElementById("tithi").innerText = p.tithi;
+            document.getElementById("nakshatra").innerText = p.nakshatra;
+            document.getElementById("sunrise").innerText = p.sunrise.toLocaleTimeString();
+            document.getElementById("sunset").innerText = p.sunset.toLocaleTimeString();
+            document.getElementById("rahukal").innerText =
+                p.rahukal.start.toLocaleTimeString() + " - " + p.rahukal.end.toLocaleTimeString();
+            document.getElementById("yamagand").innerText =
+                p.yamagand.start.toLocaleTimeString() + " - " + p.yamagand.end.toLocaleTimeString();
+
+            document.getElementById("score").innerText = ai.score;
+            document.getElementById("reading").innerText = ai.reading;
+
+            document.getElementById("trading").innerText =
+                ai.trading.start + " to " + ai.trading.end;
+
+            document.getElementById("meditation").innerText =
+                ai.meditation.best + " (Best), " +
+                ai.meditation.secondBest + " (Second Best)";
+        }
+        loadPanchang();
+
+        // -----------------------
+        // STOPWATCH
+        // -----------------------
+        let swInterval, swTime = 0;
+
+        function startStopwatch() {
+            if (swInterval) return;
+            swInterval = setInterval(() => {
+                swTime++;
+                document.getElementById("stopwatch").innerText =
+                    new Date(swTime * 1000).toISOString().substr(11, 8);
+            }, 1000);
+        }
+
+        function stopStopwatch() {
+            clearInterval(swInterval);
+            swInterval = null;
+        }
+
+        function resetStopwatch() {
+            swTime = 0;
+            document.getElementById("stopwatch").innerText = "00:00:00";
+        }
+
+        // -----------------------
+        // TIMER
+        // -----------------------
+        let timerInterval, timerSeconds;
+
+        function startTimer() {
+            timerSeconds = parseInt(document.getElementById("timerInput").value);
+            if (isNaN(timerSeconds)) return;
+
+            timerInterval = setInterval(() => {
+                document.getElementById("timer").innerText = timerSeconds;
+                timerSeconds--;
+                if (timerSeconds < 0) stopTimer();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // -----------------------
+        // WORLD CLOCK
+        // -----------------------
+        function updateWorldClock() {
+            const city = document.getElementById("worldCity").value;
+            document.getElementById("worldClock").innerText =
+                new Date().toLocaleString("en-IN", { timeZone: city });
+        }
+        setInterval(updateWorldClock, 1000);
+        updateWorldClock();
+    </script>
+
 </body>
 </html>
